@@ -77,3 +77,6 @@ Thumbs.db
 # Project specific
 *.log
 .python-version
+
+# local files 
+warp-mcp-config-local.json
