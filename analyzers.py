@@ -48,7 +48,8 @@ class AndroidSourceCodeAnalyzer:
         ]
     }
     
-    TIMEOUT = 15
+    TIMEOUT = 8  # Reduced timeout for faster responses
+    MAX_CONCURRENT_REQUESTS = 3  # Limit concurrent requests to avoid overwhelming servers
     
     @classmethod
     def fetch_source_file(cls, file_key: str, description: str) -> Optional[SourceCodeFile]:
@@ -57,11 +58,22 @@ class AndroidSourceCodeAnalyzer:
         if not urls:
             return None
             
+        # Use session for connection reuse
+        session = getattr(cls, '_session', None)
+        if session is None:
+            cls._session = requests.Session()
+            cls._session.headers.update({
+                'User-Agent': 'vHAL-MCP-Server/1.0',
+                'Accept': 'text/plain,*/*;q=0.8',
+                'Accept-Encoding': 'gzip, deflate'
+            })
+            session = cls._session
+            
         # Try each URL until one works
         last_error = None
         for url in urls:
             try:
-                response = requests.get(url, timeout=cls.TIMEOUT)
+                response = session.get(url, timeout=cls.TIMEOUT)
                 response.raise_for_status()
                 
                 # Decode base64 content from Googlesource
@@ -115,35 +127,46 @@ class AndroidSourceCodeAnalyzer:
                 property_id = properties[property_name.upper()]
                 break
         
-        # Fetch key source files
+        # Fetch key source files in parallel for better performance
+        from concurrent.futures import ThreadPoolExecutor, as_completed
         source_files = []
         
-        # Core AIDL definitions
-        vehicle_property_file = cls.fetch_source_file("vehicle_property_aidl", "Main Vehicle Property AIDL definitions")
-        if vehicle_property_file:
-            source_files.append(vehicle_property_file)
-            
-        vehicle_area_file = cls.fetch_source_file("vehicle_area_aidl", "Vehicle Area definitions for property mapping")
-        if vehicle_area_file:
-            source_files.append(vehicle_area_file)
-            
-        # HAL implementation files
-        default_hal_file = cls.fetch_source_file("default_hal_impl", "Default HAL implementation with property configurations")
-        if default_hal_file:
-            source_files.append(default_hal_file)
-            
-        hal_interface_file = cls.fetch_source_file("hal_interface", "Main vHAL interface definition")
-        if hal_interface_file:
-            source_files.append(hal_interface_file)
-            
-        # Emulator implementation (for testing/reference)
-        emulator_hal_file = cls.fetch_source_file("emulator_hal", "Emulator HAL server implementation")
-        if emulator_hal_file:
-            source_files.append(emulator_hal_file)
-            
-        emulator_config_file = cls.fetch_source_file("emulator_config", "Emulator default configuration")
-        if emulator_config_file:
-            source_files.append(emulator_config_file)
+        # Define files to fetch with priorities (most important first)
+        files_to_fetch = [
+            ("vehicle_property_aidl", "Main Vehicle Property AIDL definitions", 1),
+            ("default_hal_impl", "Default HAL implementation with property configurations", 1),
+            ("vehicle_area_aidl", "Vehicle Area definitions for property mapping", 2),
+            ("hal_interface", "Main vHAL interface definition", 2),
+            ("emulator_hal", "Emulator HAL server implementation", 3),
+            ("emulator_config", "Emulator default configuration", 3)
+        ]
+        
+        # Sort by priority (lower number = higher priority)
+        files_to_fetch.sort(key=lambda x: x[2])
+        
+        # Fetch high priority files first (synchronously for immediate results)
+        high_priority_files = [f for f in files_to_fetch if f[2] == 1]
+        for file_key, description, _ in high_priority_files:
+            file_obj = cls.fetch_source_file(file_key, description)
+            if file_obj:
+                source_files.append(file_obj)
+        
+        # Fetch lower priority files in parallel
+        low_priority_files = [f for f in files_to_fetch if f[2] > 1]
+        if low_priority_files:
+            with ThreadPoolExecutor(max_workers=cls.MAX_CONCURRENT_REQUESTS) as executor:
+                future_to_file = {
+                    executor.submit(cls.fetch_source_file, file_key, description): (file_key, description) 
+                    for file_key, description, _ in low_priority_files
+                }
+                
+                for future in as_completed(future_to_file, timeout=cls.TIMEOUT):
+                    try:
+                        file_obj = future.result(timeout=cls.TIMEOUT // 2)
+                        if file_obj:
+                            source_files.append(file_obj)
+                    except Exception:
+                        continue  # Skip failed requests
         
         # Analyze implementation details
         implementation_details = cls._extract_implementation_details(property_name, property_id, source_files)

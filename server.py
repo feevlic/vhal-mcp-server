@@ -4,6 +4,10 @@ This module provides MCP tools for Android vHAL (Vehicle Hardware Abstraction La
 analysis and documentation. It uses modular components for clean separation of concerns.
 """
 from mcp.server.fastmcp import FastMCP
+import requests
+import threading
+from urllib3.util import Retry
+from requests.adapters import HTTPAdapter
 
 # Import modular components
 from scrapers import VhalDocumentationScraper
@@ -13,6 +17,81 @@ from relationships import VhalPropertyRelationshipAnalyzer
 from summarizers import VhalSummarizer
 from code_generator import VhalCodeGenerator
 from pr_generator import VhalPullRequestGenerator
+
+# Global session management for better performance
+class SessionManager:
+    """Centralized session manager for all HTTP requests."""
+    _instance = None
+    _lock = threading.Lock()
+    
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+                    cls._instance._initialize()
+        return cls._instance
+    
+    def _initialize(self):
+        """Initialize optimized session with connection pooling."""
+        self.session = requests.Session()
+        
+        # Configure retry strategy
+        retry_strategy = Retry(
+            total=2,
+            backoff_factor=0.1,
+            status_forcelist=[429, 500, 502, 503, 504],
+            respect_retry_after_header=False  # Don't wait too long
+        )
+        
+        # Configure adapter with connection pooling
+        adapter = HTTPAdapter(
+            max_retries=retry_strategy,
+            pool_connections=10,
+            pool_maxsize=20,
+            pool_block=False
+        )
+        
+        self.session.mount("http://", adapter)
+        self.session.mount("https://", adapter)
+        
+        # Set optimized headers
+        self.session.headers.update({
+            'User-Agent': 'vHAL-MCP-Server/1.0',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Cache-Control': 'max-age=300'  # 5 minute cache hint
+        })
+    
+    def get_session(self):
+        """Get the shared session instance."""
+        return self.session
+
+# Initialize session manager early
+_session_manager = SessionManager()
+
+# Pre-initialize critical components
+def _initialize_components():
+    """Pre-initialize components for faster first-time access."""
+    try:
+        # Pre-build database indexes
+        VhalPropertyDatabase._build_indexes()
+        
+        # Pre-warm the scraper with session
+        VhalDocumentationScraper._session = _session_manager.get_session()
+        AndroidSourceCodeAnalyzer._session = _session_manager.get_session()
+        
+        # Pre-cache known pages
+        VhalDocumentationScraper.discover_pages()
+        
+    except Exception:
+        pass  # Fail silently during initialization
+
+# Initialize components in background
+import threading
+initialization_thread = threading.Thread(target=_initialize_components, daemon=True)
+initialization_thread.start()
 
 
 mcp = FastMCP("vHAL MCP Server")
@@ -29,7 +108,9 @@ def summarize_vhal(question: str) -> str:
         Summary of relevant vHAL information from Android documentation
     """
     try:
-        # Use optimized parallel scraping
+        # Use optimized parallel scraping with cached session
+        if VhalDocumentationScraper._session is None:
+            VhalDocumentationScraper._session = _session_manager.get_session()
         pages = VhalDocumentationScraper.discover_pages()
         
         # Parallel scraping for much better performance
@@ -429,6 +510,9 @@ def analyze_vhal_implementation(property_name: str) -> str:
         Comprehensive analysis of the property implementation including source code, dependencies, and usage examples
     """
     try:
+        # Ensure analyzer has access to optimized session
+        if AndroidSourceCodeAnalyzer._session is None:
+            AndroidSourceCodeAnalyzer._session = _session_manager.get_session()
         analysis = AndroidSourceCodeAnalyzer.analyze_property_implementation(property_name)
         
         result_parts = [
