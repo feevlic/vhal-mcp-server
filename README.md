@@ -15,7 +15,7 @@ The vHAL MCP Server helps Android Automotive developers by providing:
 
 See the vHAL MCP Server in action:
 
-![vHAL MCP Server Demo](res/example-prompt-vhal-mcp-server.mov)
+https://github.com/user-attachments/assets/6fcdc5fb-6cbb-4c69-9528-fa3bdee4acb1
 
 *Example: Analyzing HVAC properties and implementation guidance using Claude Desktop with the vHAL MCP Server*
 
