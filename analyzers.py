@@ -9,47 +9,111 @@ from database import VhalPropertyDatabase
 class AndroidSourceCodeAnalyzer:
     """Analyzes Android source code to show vHAL property implementations."""
     
-    # Android Googlesource URLs for different components
-    # Multiple URL options in case repository structure changes
-    GOOGLESOURCE_URLS = {
-        "vehicle_property_aidl": [
-            "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehicleProperty.aidl?format=TEXT",
-            "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/master/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehicleProperty.aidl?format=TEXT"
-        ],
-        "vehicle_area_aidl": [
-            "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehicleArea.aidl?format=TEXT",
-            "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/master/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehicleArea.aidl?format=TEXT"
-        ],
-        "vehicle_property_type_aidl": [
-            "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehiclePropertyType.aidl?format=TEXT",
-            "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/master/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehiclePropertyType.aidl?format=TEXT"
-        ],
-        "default_hal_impl": [
-            "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/aidl/impl/default_config/config/DefaultProperties.cpp?format=TEXT",
-            "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/master/automotive/vehicle/aidl/impl/default_config/config/DefaultProperties.cpp?format=TEXT",
-            "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/aidl/impl/vhal/config/DefaultConfig.h?format=TEXT"
-        ],
-        "hal_interface": [
-            "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/aidl/android/hardware/automotive/vehicle/IVehicle.aidl?format=TEXT",
-            "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/master/automotive/vehicle/aidl/android/hardware/automotive/vehicle/IVehicle.aidl?format=TEXT"
-        ],
-        "emulator_hal": [
-            "https://android.googlesource.com/device/generic/car/+/refs/heads/main/emulator/vhal/VehicleHalServer.cpp?format=TEXT",
-            "https://android.googlesource.com/device/generic/car/+/refs/heads/master/emulator/vhal/VehicleHalServer.cpp?format=TEXT"
-        ],
-        "emulator_config": [
-            "https://android.googlesource.com/device/generic/car/+/refs/heads/main/emulator/vhal/DefaultConfig.h?format=TEXT",
-            "https://android.googlesource.com/device/generic/car/+/refs/heads/master/emulator/vhal/DefaultConfig.h?format=TEXT"
-        ]
+    # Supported Android versions for vHAL (starting from Android 13)
+    SUPPORTED_ANDROID_VERSIONS = {
+        "android13": "android13-release",
+        "android14": "android14-release", 
+        "android15": "android15-release",
+        "android16": "android16-release",
+        "main": "main",  # Latest development branch
+        "master": "master"  
     }
+    
+    # Default version to use when no specific version is requested
+    DEFAULT_VERSION = "android15"  # Use Android 14 as default stable release
+    
+    @classmethod
+    def _get_version_specific_urls(cls, android_version: str = None) -> Dict[str, List[str]]:
+        """Generate version-specific URLs for Android source code."""
+        if android_version is None:
+            android_version = cls.DEFAULT_VERSION
+            
+        # Normalize version input
+        android_version = android_version.lower().strip()
+        if android_version.startswith("android") and not android_version.replace("android", "").replace("-release", "").isdigit():
+            # Handle cases like "android13", "android14", etc.
+            version_num = android_version.replace("android", "").replace("-release", "")
+            android_version = f"android{version_num}"
+        
+        # Get the actual branch name
+        branch = cls.SUPPORTED_ANDROID_VERSIONS.get(android_version)
+        if not branch:
+            # Default to Android 15 if version not found
+            branch = cls.SUPPORTED_ANDROID_VERSIONS[cls.DEFAULT_VERSION]
+            
+        # Base URL patterns for hardware/interfaces repository
+        hw_interfaces_base = f"https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/{branch}"
+        device_car_base = f"https://android.googlesource.com/device/generic/car/+/refs/heads/{branch}"
+        
+        # For Android 13, vHAL structure might be different (legacy HIDL + early AIDL)
+        if branch == "android13-release":
+            return {
+                "vehicle_property_aidl": [
+                    f"{hw_interfaces_base}/automotive/vehicle/aidl_property/android/hardware/automotive/vehicle/VehicleProperty.aidl?format=TEXT",
+                    f"{hw_interfaces_base}/automotive/vehicle/2.0/types.hal?format=TEXT",  # HIDL fallback for Android 13
+                ],
+                "vehicle_area_aidl": [
+                    f"{hw_interfaces_base}/automotive/vehicle/aidl_property/android/hardware/automotive/vehicle/VehicleArea.aidl?format=TEXT",
+                    f"{hw_interfaces_base}/automotive/vehicle/2.0/types.hal?format=TEXT",
+                ],
+                "vehicle_property_type_aidl": [
+                    f"{hw_interfaces_base}/automotive/vehicle/aidl_property/android/hardware/automotive/vehicle/VehiclePropertyType.aidl?format=TEXT",
+                    f"{hw_interfaces_base}/automotive/vehicle/2.0/types.hal?format=TEXT",
+                ],
+                "default_hal_impl": [
+                    f"{hw_interfaces_base}/automotive/vehicle/aidl/impl/default_config/config/DefaultProperties.json?format=TEXT",
+                    f"{hw_interfaces_base}/automotive/vehicle/2.0/default/impl/vhal_v2_0/DefaultConfig.h?format=TEXT",
+                ],
+                "hal_interface": [
+                    f"{hw_interfaces_base}/automotive/vehicle/aidl/android/hardware/automotive/vehicle/IVehicle.aidl?format=TEXT",
+                    f"{hw_interfaces_base}/automotive/vehicle/2.0/IVehicle.hal?format=TEXT",
+                ],
+                "emulator_hal": [
+                    f"{device_car_base}/emulator/vhal/VehicleHalServer.cpp?format=TEXT",
+                    f"{device_car_base}/emulator/vhal/VehicleEmulator.cpp?format=TEXT",
+                ],
+                "emulator_config": [
+                    f"{device_car_base}/emulator/vhal/DefaultConfig.h?format=TEXT",
+                ]
+            }
+        
+        # For Android 14+, use modern AIDL structure
+        return {
+            "vehicle_property_aidl": [
+                f"{hw_interfaces_base}/automotive/vehicle/aidl_property/android/hardware/automotive/vehicle/VehicleProperty.aidl?format=TEXT",
+            ],
+            "vehicle_area_aidl": [
+                f"{hw_interfaces_base}/automotive/vehicle/aidl_property/android/hardware/automotive/vehicle/VehicleArea.aidl?format=TEXT",
+            ],
+            "vehicle_property_type_aidl": [
+                f"{hw_interfaces_base}/automotive/vehicle/aidl_property/android/hardware/automotive/vehicle/VehiclePropertyType.aidl?format=TEXT",
+            ],
+            "default_hal_impl": [
+                f"{hw_interfaces_base}/automotive/vehicle/aidl/impl/default_config/config/DefaultProperties.json?format=TEXT",
+                f"{hw_interfaces_base}/automotive/vehicle/aidl/impl/vhal/src/DefaultVehicleHal.cpp?format=TEXT",
+                f"{hw_interfaces_base}/automotive/vehicle/aidl/impl/fake_impl/userhal/src/FakeUserHal.cpp?format=TEXT",
+            ],
+            "hal_interface": [
+                f"{hw_interfaces_base}/automotive/vehicle/aidl/android/hardware/automotive/vehicle/IVehicle.aidl?format=TEXT",
+            ],
+            "emulator_hal": [
+                f"{device_car_base}/emulator/vhal/VehicleHalServer.cpp?format=TEXT",
+                f"{device_car_base}/emulator/vhal/VehicleEmulator.cpp?format=TEXT",
+            ],
+            "emulator_config": [
+                f"{device_car_base}/emulator/vhal/DefaultConfig.h?format=TEXT",
+            ]
+        }
     
     TIMEOUT = 8  # Reduced timeout for faster responses
     MAX_CONCURRENT_REQUESTS = 3  # Limit concurrent requests to avoid overwhelming servers
     
     @classmethod
-    def fetch_source_file(cls, file_key: str, description: str) -> Optional[SourceCodeFile]:
+    def fetch_source_file(cls, file_key: str, description: str, android_version: str = None) -> Optional[SourceCodeFile]:
         """Fetch a source file from Android Googlesource with fallback URLs."""
-        urls = cls.GOOGLESOURCE_URLS.get(file_key)
+        # Get version-specific URLs
+        version_urls = cls._get_version_specific_urls(android_version)
+        urls = version_urls.get(file_key)
         if not urls:
             return None
             
@@ -112,8 +176,27 @@ class AndroidSourceCodeAnalyzer:
         )
     
     @classmethod
-    def analyze_property_implementation(cls, property_name: str) -> VhalImplementationAnalysis:
-        """Analyze how a specific vHAL property is implemented in Android source code."""
+    def analyze_property_implementation(cls, property_name: str, android_version: str = None) -> VhalImplementationAnalysis:
+        """Analyze how a specific vHAL property is implemented in Android source code.
+        
+        Args:
+            property_name: The vHAL property name to analyze
+            android_version: Optional Android version (e.g., 'android13', 'android14', 'android15', 'android16')
+                           If not specified, uses the default version (Android 15)
+        """
+        
+        # Validate and normalize android_version
+        if android_version:
+            android_version = android_version.lower().strip()
+            if android_version not in cls.SUPPORTED_ANDROID_VERSIONS:
+                # Try to extract version number if format is different
+                for supported_version in cls.SUPPORTED_ANDROID_VERSIONS:
+                    if supported_version.replace('android', '') in android_version:
+                        android_version = supported_version
+                        break
+                else:
+                    # If still not found, use default
+                    android_version = cls.DEFAULT_VERSION
         
         # Get property ID from database
         property_id = "Unknown"
@@ -142,7 +225,7 @@ class AndroidSourceCodeAnalyzer:
         # Fetch high priority files first (synchronously for immediate results)
         high_priority_files = [f for f in files_to_fetch if f[2] == 1]
         for file_key, description, _ in high_priority_files:
-            file_obj = cls.fetch_source_file(file_key, description)
+            file_obj = cls.fetch_source_file(file_key, description, android_version)
             if file_obj:
                 source_files.append(file_obj)
         
@@ -151,7 +234,7 @@ class AndroidSourceCodeAnalyzer:
         if low_priority_files:
             with ThreadPoolExecutor(max_workers=cls.MAX_CONCURRENT_REQUESTS) as executor:
                 future_to_file = {
-                    executor.submit(cls.fetch_source_file, file_key, description): (file_key, description) 
+                    executor.submit(cls.fetch_source_file, file_key, description, android_version): (file_key, description) 
                     for file_key, description, _ in low_priority_files
                 }
                 
@@ -279,7 +362,7 @@ config.areaConfigs = {{/* climate area configurations */}};""")
             "VehicleArea.aidl - Area type definitions", 
             "VehiclePropertyType.aidl - Data type definitions",
             "IVehicle.aidl - Main HAL interface",
-            "DefaultProperties.cpp - Default property configurations"
+            "DefaultProperties.json - Default property configurations"
         ]
         
         category_files = []

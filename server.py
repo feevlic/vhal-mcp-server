@@ -492,11 +492,17 @@ def generate_vhal_pr_message(
 
 
 @mcp.tool()
-def analyze_vhal_implementation(property_name: str) -> str:
+def analyze_vhal_implementation(property_name: str, android_version: str = None) -> str:
     """Analyze Android source code to show how a vHAL property is implemented, including actual source code, file locations, and usage examples.
     
     Args:
         property_name: The vHAL property name to analyze (e.g., "HVAC_STEERING_WHEEL_HEAT", "SEAT_MEMORY_SELECT")
+        android_version: Optional Android version to analyze (e.g., "android13", "android14", "android15", "android16")
+                        If not specified, uses Android 15 as default. Supported versions:
+                        - android13: Android 13 (first vHAL introduction)
+                        - android14: Android 14 (major vHAL changes)
+                        - android15: Android 15 (current stable, default)
+                        - android16: Android 16 (latest)
         
     Returns:
         Comprehensive analysis of the property implementation including source code, dependencies, and usage examples
@@ -505,7 +511,7 @@ def analyze_vhal_implementation(property_name: str) -> str:
         # Ensure analyzer has access to optimized session
         if AndroidSourceCodeAnalyzer._session is None:
             AndroidSourceCodeAnalyzer._session = _session_manager.get_session()
-        analysis = AndroidSourceCodeAnalyzer.analyze_property_implementation(property_name)
+        analysis = AndroidSourceCodeAnalyzer.analyze_property_implementation(property_name, android_version)
         
         result_parts = [
             f"vHAL Implementation Analysis for: '{analysis.property_name}'\n",

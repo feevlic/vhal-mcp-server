@@ -210,9 +210,9 @@ class VhalPropertyDatabase:
 class AndroidSourceLookup:
     """Utility for looking up Android source code locations."""
     
-    AIDL_URL = "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehicleProperty.aidl"
-    HAL_BASE_URL = "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/"
-    REFERENCE_IMPL_URL = "https://android.googlesource.com/device/generic/car/+/refs/heads/main/emulator/"
+    AIDL_URL = "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/android15-release/automotive/vehicle/aidl_property/android/hardware/automotive/vehicle/VehicleProperty.aidl"
+    HAL_BASE_URL = "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/android15-release/automotive/vehicle/"
+    REFERENCE_IMPL_URL = "https://android.googlesource.com/device/generic/car/+/refs/heads/android15-release/emulator/"
     
     @staticmethod
     def generate_search_url(keyword: str) -> str:
