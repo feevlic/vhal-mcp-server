@@ -332,34 +332,34 @@ I'm developing a next-generation intelligent climate control system for luxury e
 
 **Phase 1: Discovery & Research (Tools 1-2)**
 First, help me understand the complete landscape:
-1. Use `summarize_vhal` to explain the overall VHAL climate control architecture, focusing on:
+1. explain the overall VHAL climate control architecture, focusing on:
    - Multi-zone HVAC systems
    - Integration with seat heating/cooling
    - Energy efficiency considerations for EVs
    - Safety and emergency override systems
 
-2. Use `lookup_android_source_code` to find all climate-related properties, including:
+2. find all climate-related properties, including:
    - HVAC properties (search: "HVAC")
    - Seat thermal properties (search: "SEAT")
    - Power management properties (search: "POWER")
    - Any auxiliary heating properties (search: "HEAT")
 
 **Phase 2: System Analysis & Dependencies (Tool 3)**
-3. Use `discover_related_properties` to analyze the complete ecosystem for:
+3. analyze the complete ecosystem for:
    - "HVAC_TEMPERATURE_SET" - understand temperature control relationships
    - "SEAT_HEAT" - analyze seat thermal dependencies
    - "HVAC_POWER_ON" - understand system power relationships
    - "HVAC_FAN_SPEED" - analyze airflow control dependencies
 
 **Phase 3: Implementation Deep-Dive (Tool 4)**
-4. Use `analyze_vhal_implementation` to get detailed source code analysis for:
+4. get detailed source code analysis for:
    - "HVAC_TEMPERATURE_SET" - see how Android implements temperature control
    - "HVAC_AUTO_ON" - understand automatic mode implementation
    - "SEAT_HEAT_LEFT" - analyze seat heating implementation patterns
    - "HVAC_AC_ON" - understand AC compressor control
 
 **Phase 5: Custom Implementation (Tool 5)**
-5. Based on the analysis, use `generate_vhal_implementation_code` to create a new intelligent climate property:
+5. Based on the analysis create a new intelligent climate property:
 
 - Property Name: CLIMATE_INTELLIGENT_PROFILE
 - Property ID: 0x15400F01
