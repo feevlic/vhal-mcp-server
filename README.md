@@ -67,6 +67,22 @@ Looks up Android source code locations and property definitions.
 lookup_android_source_code("SEAT_POSITION", "vhal")
 ```
 
+### `discover_related_properties(property_or_category: str)`
+
+Discovers related properties, dependencies, and suggested implementation order for vHAL property ecosystems.
+
+**Examples:**
+```python
+# Analyze a property ecosystem
+discover_related_properties("SEAT_MEMORY")
+
+# Analyze a specific property
+discover_related_properties("SEAT_MEMORY_SELECT")
+
+# Analyze HVAC ecosystem
+discover_related_properties("HVAC_BASIC")
+```
+
 ## Development
 
 ### Project Structure

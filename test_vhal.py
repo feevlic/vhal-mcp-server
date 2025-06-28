@@ -2,7 +2,7 @@
 """Test suite for vHAL MCP Server."""
 
 import unittest
-from server import summarize_vhal, lookup_android_source_code
+from server import summarize_vhal, lookup_android_source_code, discover_related_properties
 
 
 class TestVhalMcpServer(unittest.TestCase):
@@ -40,6 +40,40 @@ class TestVhalMcpServer(unittest.TestCase):
         
         self.assertIsInstance(result, str)
         self.assertIn("Source Code Locations", result)
+    
+    def test_discover_seat_memory_properties(self):
+        """Test discovery of SEAT_MEMORY related properties."""
+        result = discover_related_properties("SEAT_MEMORY")
+        
+        self.assertIsInstance(result, str)
+        self.assertIn("SEAT_MEMORY", result)
+        self.assertIn("Implementation Order", result)
+        self.assertIn("SEAT_MEMORY_SELECT", result)
+        self.assertIn("SEAT_MEMORY_SET", result)
+    
+    def test_discover_hvac_basic_properties(self):
+        """Test discovery of HVAC_BASIC related properties."""
+        result = discover_related_properties("HVAC_BASIC")
+        
+        self.assertIsInstance(result, str)
+        self.assertIn("HVAC", result)
+        self.assertIn("HVAC_POWER_ON", result)
+        self.assertIn("HVAC_TEMPERATURE_SET", result)
+    
+    def test_discover_specific_property_relationships(self):
+        """Test discovery using a specific property name."""
+        result = discover_related_properties("SEAT_FORE_AFT_POS")
+        
+        self.assertIsInstance(result, str)
+        self.assertIn("SEAT", result)
+        self.assertIn("Related Properties", result)
+    
+    def test_discover_unknown_property(self):
+        """Test discovery with an unknown property."""
+        result = discover_related_properties("UNKNOWN_PROPERTY")
+        
+        self.assertIsInstance(result, str)
+        self.assertIn("not found in known ecosystems", result)
 
 
 def run_basic_tests():
@@ -62,6 +96,16 @@ def run_basic_tests():
         print("3. Testing HVAC property lookup...")
         result = lookup_android_source_code("HVAC")
         print(f"   ✓ HVAC lookup successful ({len(result)} characters)")
+        
+        # Test property relationship discovery
+        print("4. Testing property relationship discovery...")
+        result = discover_related_properties("SEAT_MEMORY")
+        print(f"   ✓ Property discovery successful ({len(result)} characters)")
+        
+        # Test HVAC ecosystem discovery
+        print("5. Testing HVAC ecosystem discovery...")
+        result = discover_related_properties("HVAC_BASIC")
+        print(f"   ✓ HVAC ecosystem discovery successful ({len(result)} characters)")
         
         print("\n" + "="*60)
         print("All tests completed successfully!")
