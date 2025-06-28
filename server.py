@@ -11,6 +11,7 @@ from database import VhalPropertyDatabase, AndroidSourceLookup
 from analyzers import AndroidSourceCodeAnalyzer
 from relationships import VhalPropertyRelationshipAnalyzer
 from summarizers import VhalSummarizer
+from code_generator import VhalCodeGenerator
 
 
 mcp = FastMCP("vHAL MCP Server")
@@ -207,6 +208,98 @@ def discover_related_properties(property_or_category: str) -> str:
         
     except Exception as e:
         return f"Error analyzing property relationships: {str(e)}"
+
+
+@mcp.tool()
+def generate_vhal_implementation_code(
+    name: str,
+    property_id: str,
+    property_type: str,
+    group: str,
+    access: str,
+    change_mode: str,
+    description: str,
+    units: str = None,
+    min_value: float = None,
+    max_value: float = None,
+    areas: list = None,
+    enum_values: dict = None,
+    dependencies: list = None,
+    sample_rate_hz: float = None
+) -> str:
+    """Generate complete VHAL property implementation code for Android Automotive OS (AAOS).
+    
+    This tool generates all necessary files, configurations, tests, and documentation
+    needed to implement a new VHAL property from scratch.
+    
+    Args:
+        name: Property name (e.g., "HVAC_STEERING_WHEEL_HEAT")
+        property_id: Unique property ID (hex format, e.g., "0x15400A03")
+        property_type: Data type (BOOLEAN, INT32, INT64, FLOAT, STRING, BYTES, *_VEC, MIXED)
+        group: Property group (HVAC, SEAT, LIGHTS, POWER, CLIMATE, etc.)
+        access: Access mode (READ, WRITE, READ_WRITE)
+        change_mode: Change mode (STATIC, ON_CHANGE, CONTINUOUS)
+        description: Property description for documentation
+        units: Optional units (e.g., "celsius", "rpm")
+        min_value: Optional minimum value for numeric types
+        max_value: Optional maximum value for numeric types
+        areas: Optional list of vehicle areas/zones
+        enum_values: Optional dict of enum names and values for INT32 enum properties
+        dependencies: Optional list of dependent property names
+        sample_rate_hz: Optional sample rate for continuous properties
+        
+    Returns:
+        Complete implementation including all generated files, summary, and implementation guide
+    """
+    try:
+        # Generate the complete implementation
+        result = VhalCodeGenerator.generate_vhal_implementation(
+            name=name,
+            property_id=property_id,
+            property_type=property_type,
+            group=group,
+            access=access,
+            change_mode=change_mode,
+            description=description,
+            units=units,
+            min_value=min_value,
+            max_value=max_value,
+            areas=areas,
+            enum_values=enum_values,
+            dependencies=dependencies,
+            sample_rate_hz=sample_rate_hz
+        )
+        
+        # Format the output
+        output_parts = [
+            f"VHAL Implementation Generated for: {result.property_name}\n",
+            "=" * 80,
+            "\n## SUMMARY",
+            result.summary,
+            "\n\n## GENERATED FILES",
+            "\nThe following code sections have been generated:"
+        ]
+        
+        # Add each generated file
+        for i, file in enumerate(result.files, 1):
+            output_parts.extend([
+                f"\n\n### {i}. {file.description}",
+                f"**File:** `{file.path}`",
+                f"\n```{VhalCodeGenerator._get_file_extension(file.path)}",
+                file.content,
+                "```"
+            ])
+        
+        # Add implementation guide
+        output_parts.extend([
+            "\n\n## IMPLEMENTATION GUIDE",
+            result.implementation_guide
+        ])
+        
+        return "\n".join(output_parts)
+        
+    except Exception as e:
+        return f"Error generating VHAL implementation: {str(e)}"
 
 
 @mcp.tool()

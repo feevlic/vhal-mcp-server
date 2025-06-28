@@ -43,6 +43,12 @@ See the vHAL MCP Server in action:
 - Provides implementation examples and usage patterns
 - Includes dependency analysis and best practices
 
+**`generate_vhal_implementation_code(...)`**
+- Generates complete VHAL property implementation code for AAOS
+- Creates all necessary files, configurations, tests, and documentation
+- Supports all VHAL data types, property groups, and access modes
+- Includes HAL definitions, Java APIs, tests, and build configurations
+
 ## Installation
 
 ### Prerequisites
@@ -239,6 +245,263 @@ I want to add a new custom HVAC feature for air quality monitoring. Help me:
 - Design the property specification
 - Plan the HAL implementation approach
 ```
+
+### VHAL Code Generation Examples
+
+Use the `generate_vhal_implementation_code` tool to create complete VHAL implementations:
+
+**Smart Dashboard Lighting System**
+```
+Generate a complete VHAL implementation for a smart dashboard lighting system with the following specifications:
+
+- Property Name: DASHBOARD_SMART_LIGHTING_MODE
+- Property ID: 0x15400B01
+- Type: INT32 (enumerated values)
+- Group: LIGHTS
+- Access: READ_WRITE
+- Change Mode: ON_CHANGE
+- Description: Smart dashboard lighting control with adaptive brightness and color temperature
+- Enum Values: OFF=0, AUTO=1, DAY=2, NIGHT=3, CUSTOM=4
+- Dependencies: NIGHT_MODE, CABIN_LIGHTS_STATE
+
+Please use the generate_vhal_implementation_code tool.
+```
+
+**Electric Vehicle Charging Management**
+```
+I need to implement a comprehensive EV charging management system. Create a VHAL property with these requirements:
+
+- Property Name: EV_CHARGING_PORT_STATUS
+- Property ID: 0x15400C01
+- Type: INT32 (enum)
+- Group: POWER
+- Access: READ (status monitoring only)
+- Change Mode: ON_CHANGE
+- Description: Electric vehicle charging port status and connection state
+- Enum Values: DISCONNECTED=0, CONNECTED=1, CHARGING=2, ERROR=3, COMPLETE=4, SCHEDULED=5
+- Dependencies: EV_BATTERY_LEVEL, EV_CHARGING_RATE
+- Areas: GLOBAL
+
+Generate the complete implementation using generate_vhal_implementation_code.
+```
+
+**Advanced HVAC Zone Control**
+```
+Implement an advanced HVAC zone control system for precise temperature management:
+
+- Property Name: HVAC_ZONE_CLIMATE_PROFILE
+- Property ID: 0x15400D01
+- Type: FLOAT
+- Group: HVAC
+- Access: READ_WRITE
+- Change Mode: CONTINUOUS
+- Description: Advanced HVAC zone climate profile with precise temperature control
+- Units: celsius
+- Min Value: 16.0
+- Max Value: 32.0
+- Areas: ["SEAT_ROW_1_LEFT", "SEAT_ROW_1_RIGHT", "SEAT_ROW_2_LEFT", "SEAT_ROW_2_RIGHT"]
+- Dependencies: HVAC_TEMPERATURE_SET, HVAC_FAN_SPEED
+- Sample Rate: 0.5 Hz (update every 2 seconds)
+
+Use generate_vhal_implementation_code to create the full implementation.
+```
+
+**Biometric Seat Adjustment**
+```
+Create a biometric-based seat adjustment system:
+
+- Property Name: SEAT_BIOMETRIC_PROFILE
+- Property ID: 0x15400E01
+- Type: STRING
+- Group: SEAT
+- Access: READ_WRITE
+- Change Mode: ON_CHANGE
+- Description: Biometric-based automatic seat adjustment with user recognition
+- Areas: ["SEAT_ROW_1_LEFT", "SEAT_ROW_1_RIGHT"]
+- Dependencies: SEAT_HEIGHT_POS, SEAT_FORE_AFT_POS, SEAT_RECLINE_ANGLE
+
+Generate the complete VHAL implementation.
+```
+
+### Expert Prompt: Complete VHAL System Development
+
+This expert-level prompt demonstrates using all 5 MCP tools in a comprehensive workflow for developing a complete automotive system:
+
+```
+I'm developing a next-generation intelligent climate control system for luxury electric vehicles. This system needs to integrate multiple subsystems and provide personalized comfort experiences. Please help me design and implement this system using a comprehensive analysis approach:
+
+**Phase 1: Discovery & Research (Tools 1-2)**
+First, help me understand the complete landscape:
+1. Use `summarize_vhal` to explain the overall VHAL climate control architecture, focusing on:
+   - Multi-zone HVAC systems
+   - Integration with seat heating/cooling
+   - Energy efficiency considerations for EVs
+   - Safety and emergency override systems
+
+2. Use `lookup_android_source_code` to find all climate-related properties, including:
+   - HVAC properties (search: "HVAC")
+   - Seat thermal properties (search: "SEAT")
+   - Power management properties (search: "POWER")
+   - Any auxiliary heating properties (search: "HEAT")
+
+**Phase 2: System Analysis & Dependencies (Tool 3)**
+3. Use `discover_related_properties` to analyze the complete ecosystem for:
+   - "HVAC_TEMPERATURE_SET" - understand temperature control relationships
+   - "SEAT_HEAT" - analyze seat thermal dependencies
+   - "HVAC_POWER_ON" - understand system power relationships
+   - "HVAC_FAN_SPEED" - analyze airflow control dependencies
+
+**Phase 3: Implementation Deep-Dive (Tool 4)**
+4. Use `analyze_vhal_implementation` to get detailed source code analysis for:
+   - "HVAC_TEMPERATURE_SET" - see how Android implements temperature control
+   - "HVAC_AUTO_ON" - understand automatic mode implementation
+   - "SEAT_HEAT_LEFT" - analyze seat heating implementation patterns
+   - "HVAC_AC_ON" - understand AC compressor control
+
+**Phase 5: Custom Implementation (Tool 5)**
+5. Based on the analysis, use `generate_vhal_implementation_code` to create a new intelligent climate property:
+
+- Property Name: CLIMATE_INTELLIGENT_PROFILE
+- Property ID: 0x15400F01
+- Type: INT32 (enumerated values)
+- Group: HVAC
+- Access: READ_WRITE
+- Change Mode: ON_CHANGE
+- Description: Intelligent climate control with predictive comfort algorithms, energy optimization, and personalized user profiles
+- Enum Values: PROFILE_ECO=0, PROFILE_COMFORT=1, PROFILE_SPORT=2, PROFILE_CUSTOM=3, PROFILE_SLEEP=4, PROFILE_DEFROST_PRIORITY=5
+- Dependencies: HVAC_TEMPERATURE_SET, HVAC_FAN_SPEED, SEAT_HEAT_LEFT, SEAT_HEAT_RIGHT, HVAC_AC_ON, EV_BATTERY_LEVEL
+- Units: none
+- Areas: ["GLOBAL", "SEAT_ROW_1_LEFT", "SEAT_ROW_1_RIGHT"]
+
+**Expected Deliverables:**
+After running this comprehensive analysis, I expect to receive:
+
+1. **Complete System Understanding** - From summarize_vhal: architectural overview and best practices
+2. **Property Inventory** - From lookup_android_source_code: all relevant properties with IDs and locations
+3. **Dependency Maps** - From discover_related_properties: implementation order and relationships
+4. **Implementation Patterns** - From analyze_vhal_implementation: real Android source code examples
+5. **Production-Ready Code** - From generate_vhal_implementation_code: complete implementation files
+
+**Integration Questions:**
+After the analysis, please also address:
+- How should I prioritize energy efficiency vs comfort in EV applications?
+- What are the safety considerations for automatic climate control?
+- How should the system handle conflicting user preferences in multi-zone scenarios?
+- What testing strategies are recommended for climate control systems?
+- How should I integrate with existing Android Automotive UI frameworks?
+
+This comprehensive approach will give me everything needed to implement a production-quality intelligent climate control system.
+```
+
+**Expected Workflow:**
+This expert prompt will trigger all 5 tools in sequence, providing:
+- **Comprehensive Documentation** (Tool 1)
+- **Complete Property Discovery** (Tool 2)
+- **Relationship Analysis** for 4+ property ecosystems (Tool 3)
+- **Source Code Analysis** for 4+ implementations (Tool 4)
+- **Production Code Generation** (Tool 5)
+
+**Benefits:**
+- **Complete System Understanding**: From high-level architecture to implementation details
+- **Real-World Patterns**: Based on actual Android Automotive source code
+- **Production-Ready Output**: All files needed for AAOS integration
+- **Best Practices**: Comprehensive guidance from Android experts
+- **Time Savings**: Hours of research condensed into minutes
+
+### VHAL Code Generator Features
+
+The `generate_vhal_implementation_code` tool creates complete, production-ready VHAL implementations:
+
+#### Generated Files
+
+For each VHAL property, the generator creates:
+
+**Core HAL Files:**
+- `types.hal` - Property definition and enums
+- `DefaultConfig.h` - Property configuration
+- `EmulatedVehicleHal.cpp` - Implementation logic
+- `VehicleProperty.aidl` - AIDL interface
+
+**Framework Integration:**
+- `VehiclePropertyIds.java` - Java constants
+- `CarPropertyManager.java` - API methods
+- Configuration JSON files
+
+**Testing:**
+- `VehicleHalTest.cpp` - C++ unit tests
+- `VehiclePropertyTest.java` - Java integration tests
+
+**System Configuration:**
+- SEPolicy rules
+- Build configurations
+- Documentation
+
+#### Tool Parameters
+
+**Required:**
+- `name`: Property name (e.g., "HVAC_STEERING_WHEEL_HEAT")
+- `property_id`: Unique property ID (hex format, e.g., "0x15400A03")
+- `property_type`: Data type (BOOLEAN, INT32, INT64, FLOAT, STRING, BYTES, *_VEC, MIXED)
+- `group`: Property group (HVAC, SEAT, LIGHTS, POWER, CLIMATE, etc.)
+- `access`: Access mode (READ, WRITE, READ_WRITE)
+- `change_mode`: Change mode (STATIC, ON_CHANGE, CONTINUOUS)
+- `description`: Property description for documentation
+
+**Optional:**
+- `units`: Units (e.g., "celsius", "rpm")
+- `min_value`: Minimum value for numeric types
+- `max_value`: Maximum value for numeric types
+- `areas`: List of vehicle areas/zones
+- `enum_values`: Dict of enum names and values for INT32 enum properties
+- `dependencies`: List of dependent property names
+- `sample_rate_hz`: Sample rate for continuous properties
+
+#### Property Types Supported
+
+**Basic Types:**
+- **BOOLEAN**: True/false values
+- **INT32**: 32-bit integers
+- **INT64**: 64-bit integers  
+- **FLOAT**: Floating point numbers
+- **STRING**: Text values
+- **BYTES**: Binary data
+
+**Vector Types:**
+- **INT32_VEC**: Arrays of integers
+- **FLOAT_VEC**: Arrays of floats
+- **STRING_VEC**: Arrays of strings
+- **BYTES_VEC**: Arrays of binary data
+
+**Special Types:**
+- **MIXED**: Complex structured data
+
+#### Property Groups
+
+- **BODY**: Body control systems
+- **CABIN**: Interior cabin controls
+- **CLIMATE**: Climate control systems
+- **DISPLAY**: Display and infotainment
+- **ENGINE**: Engine management
+- **HVAC**: Heating, ventilation, air conditioning
+- **INFO**: Vehicle information
+- **INSTRUMENT_CLUSTER**: Dashboard instruments
+- **LIGHTS**: Lighting systems
+- **MIRROR**: Mirror controls
+- **POWER**: Power management
+- **SEAT**: Seat controls
+- **VEHICLE_MAP_SERVICE**: Navigation services
+- **WINDOW**: Window controls
+- **VENDOR**: Vendor-specific properties
+
+#### Generated Output
+
+When you use the code generator, it produces:
+
+1. **Complete Summary** - Property configuration and overview
+2. **Generated Files** - All 10+ necessary implementation files with syntax highlighting
+3. **Implementation Guide** - Step-by-step integration instructions
+4. **Usage Examples** - Sample code for using the property
+5. **Build Commands** - AAOS build and test commands
 
 ## Use Cases
 
