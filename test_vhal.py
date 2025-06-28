@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Test suite for vHAL MCP Server."""
-
 import unittest
 from server import summarize_vhal, lookup_android_source_code, discover_related_properties, analyze_vhal_implementation
 

@@ -4,7 +4,6 @@ import threading
 from urllib3.util import Retry
 from requests.adapters import HTTPAdapter
 
-# Import modular components
 from scrapers import VhalDocumentationScraper
 from database import VhalPropertyDatabase, AndroidSourceLookup
 from analyzers import AndroidSourceCodeAnalyzer
@@ -13,7 +12,6 @@ from summarizers import VhalSummarizer
 from code_generator import VhalCodeGenerator
 from pr_generator import VhalPullRequestGenerator
 
-# Global session management for better performance
 class SessionManager:
     """Centralized session manager for all HTTP requests."""
     _instance = None
@@ -63,7 +61,6 @@ class SessionManager:
         """Get the shared session instance."""
         return self.session
 
-# Initialize session manager early
 _session_manager = SessionManager()
 
 # Pre-initialize critical components

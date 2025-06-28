@@ -1,8 +1,3 @@
-"""Web scraping functionality for vHAL documentation.
-
-This module handles scraping Android vHAL documentation from various sources.
-Includes caching and performance optimizations.
-"""
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
