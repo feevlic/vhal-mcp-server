@@ -71,36 +71,42 @@ The vHAL MCP Server helps Android Automotive developers by providing:
 
 #### Claude Desktop Configuration
 
-Add the following to your Claude Desktop MCP configuration file:
+1. **Find your `uv` installation path**
+   ```bash
+   which uv
+   ```
 
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
+2. **Locate your Claude Desktop configuration file**
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
 
-```json
-{
-  "mcpServers": {
-    "vhal-mcp-server": {
-      "command": "python",
-      "args": ["/path/to/vhal-mcp-server/main.py"],
-      "env": {}
-    }
-  }
-}
-```
+3. **Add the server configuration**
+   
+   Edit the configuration file and add the following (replace the paths with your actual paths):
+   ```json
+   {
+     "mcpServers": {
+       "vhal-mcp-server": {
+         "command": "/path/to/your/uv",
+         "args": ["run", "--directory", "/path/to/vhal-mcp-server", "python", "main.py"],
+         "env": {}
+       }
+     }
+   }
+   ```
 
-#### Alternative Configuration (using uv)
+   **Important**: 
+   - Replace `/path/to/your/uv` with the output from step 1 (e.g., `/Users/yourusername/.local/bin/uv`)
+   - Replace `/path/to/vhal-mcp-server` with the actual path where you cloned the repository
+   - On macOS, GUI applications like Claude Desktop may not have access to your shell's PATH, so using full paths is required
 
-```json
-{
-  "mcpServers": {
-    "vhal-mcp-server": {
-      "command": "uv",
-      "args": ["run", "/path/to/vhal-mcp-server/main.py"],
-      "env": {}
-    }
-  }
-}
-```
+4. **Restart Claude Desktop**
+   
+   After saving the configuration file, completely quit and restart Claude Desktop for the MCP server to be loaded.
+
+5. **Allow MCP server access**
+   
+   When you first ask a question that requires the vHAL tools, Claude will prompt you to allow the MCP server to use its tools. Click "Allow" to enable the vHAL analysis capabilities.
 
 #### Zed Editor Configuration
 
