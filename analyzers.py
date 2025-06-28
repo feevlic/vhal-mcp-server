@@ -1,8 +1,3 @@
-"""
-Android source code analyzers for vHAL implementations.
-
-This module analyzes Android source code to show how vHAL properties are implemented.
-"""
 import requests
 import base64
 from urllib.parse import quote
