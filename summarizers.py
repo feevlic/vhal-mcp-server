@@ -1,8 +1,3 @@
-"""
-Documentation summarization utilities for vHAL content.
-
-This module provides functionality to summarize vHAL documentation based on user queries.
-"""
 import re
 from typing import List, Tuple
 from functools import lru_cache

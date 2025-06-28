@@ -1,9 +1,3 @@
-"""Pull Request Message Generator for VHAL Implementations
-
-This module generates comprehensive pull request messages for VHAL property implementations,
-providing structured descriptions of changes, features, and testing requirements.
-"""
-
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime

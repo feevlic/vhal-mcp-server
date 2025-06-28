@@ -1,8 +1,3 @@
-"""
-Data models and enums for the vHAL MCP server.
-
-This module contains all the data classes and enums used throughout the application.
-"""
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Dict, Optional

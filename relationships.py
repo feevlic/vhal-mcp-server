@@ -1,9 +1,3 @@
-"""
-Property relationship analyzer for vHAL implementation guidance.
-
-This module analyzes relationships between vHAL properties and provides 
-implementation guidance with proper sequencing and dependencies.
-"""
 from typing import Optional, Dict, List
 from models import (
     VhalCategory, PropertyRelationship, PropertyImplementationStep, 

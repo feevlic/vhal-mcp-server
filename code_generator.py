@@ -1,9 +1,3 @@
-"""VHAL Implementation Code Generator for MCP Server
-
-This module provides VHAL property implementation code generation capabilities
-that integrate with the MCP server framework.
-"""
-
 import os
 import json
 from typing import Dict, List, Optional, Any

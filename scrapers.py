@@ -27,10 +27,14 @@ class VhalDocumentationScraper:
     
     KNOWN_PAGES = [
         "https://source.android.com/docs/automotive/vhal",
-        "https://source.android.com/docs/automotive/vhal/properties", 
-        "https://source.android.com/docs/automotive/vhal/vehicle-areas",
-        "https://source.android.com/docs/automotive/vhal/diagnostics",
-        "https://source.android.com/docs/automotive/vhal/hal-implementation"
+        "https://source.android.com/docs/automotive/vhal/vhal-interface", 
+        "https://source.android.com/docs/automotive/vhal/property-configuration",
+        "https://source.android.com/docs/automotive/vhal/special-properties",
+        "https://source.android.com/docs/automotive/vhal/seat-steering"
+        "https://source.android.com/docs/automotive/vhal/adas-properties"
+        "https://source.android.com/docs/automotive/vhal/reference-implementation"
+        "https://source.android.com/docs/automotive/vhal/vhal_debug"
+        "https://source.android.com/docs/automotive/vhal/native-client"
     ]
     
     @classmethod

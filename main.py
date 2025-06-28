@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""vHAL MCP Server entry point."""
 
 from server import mcp
 

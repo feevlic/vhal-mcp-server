@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""
-Performance testing script for the vHAL MCP server.
-
-This script benchmarks the various optimizations and measures performance improvements.
-"""
 import time
 import statistics
 from typing import List, Callable, Any

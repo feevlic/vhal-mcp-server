@@ -1,8 +1,3 @@
-"""vHAL MCP Server - Main server implementation.
-
-This module provides MCP tools for Android vHAL (Vehicle Hardware Abstraction Layer)
-analysis and documentation. It uses modular components for clean separation of concerns.
-"""
 from mcp.server.fastmcp import FastMCP
 import requests
 import threading
