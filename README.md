@@ -15,7 +15,7 @@ The vHAL MCP Server helps Android Automotive developers by providing:
 
 See the vHAL MCP Server in action:
 
-![vHAL MCP Server Demo](res/example-prompt-vhal-mcp-server.mov)
+https://github.com/user-attachments/assets/6fcdc5fb-6cbb-4c69-9528-fa3bdee4acb1
 
 *Example: Analyzing HVAC properties and implementation guidance using Claude Desktop with the vHAL MCP Server*
 
@@ -63,12 +63,12 @@ See the vHAL MCP Server in action:
    
    Using HTTPS:
    ```bash
-   git clone https://github.com/felixboudnik/vhal-mcp-server.git
+   git clone https://github.com/feevlic/vhal-mcp-server.git
    ```
    
    Using SSH:
    ```bash
-   git clone git@github.com:felixboudnik/vhal-mcp-server.git
+   git clone git@github.com:feevlic/vhal-mcp-server.git
    ```
 
 2. **Navigate to the project directory**
