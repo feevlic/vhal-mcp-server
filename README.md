@@ -57,12 +57,12 @@ https://github.com/user-attachments/assets/6fcdc5fb-6cbb-4c69-9528-fa3bdee4acb1
    
    Using HTTPS:
    ```bash
-   git clone https://github.com/felixboudnik/vhal-mcp-server.git
+   git clone https://github.com/feevlic/vhal-mcp-server.git
    ```
    
    Using SSH:
    ```bash
-   git clone git@github.com:felixboudnik/vhal-mcp-server.git
+   git clone git@github.com:feevlic/vhal-mcp-server.git
    ```
 
 2. **Navigate to the project directory**
