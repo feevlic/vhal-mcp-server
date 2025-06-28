@@ -46,12 +46,23 @@ The vHAL MCP Server helps Android Automotive developers by providing:
 ### Local Setup
 
 1. **Clone the repository**
+   
+   Using HTTPS:
    ```bash
    git clone https://github.com/felixboudnik/vhal-mcp-server.git
+   ```
+   
+   Using SSH:
+   ```bash
+   git clone git@github.com:felixboudnik/vhal-mcp-server.git
+   ```
+
+2. **Navigate to the project directory**
+   ```bash
    cd vhal-mcp-server
    ```
 
-2. **Install dependencies**
+3. **Install dependencies**
    ```bash
    pip install -e .
    ```
