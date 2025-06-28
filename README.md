@@ -7,6 +7,7 @@ A Model Context Protocol (MCP) server that provides access to Android Vehicle Ha
 - **Documentation Summarization**: Query vHAL documentation with natural language questions
 - **Source Code Lookup**: Find Android source code locations and property definitions
 - **Property Database**: Access to comprehensive vHAL property definitions and IDs
+- **🆕 Source Code Analysis**: Fetch and analyze actual Android source code with real implementation examples
 
 ## Installation
 
@@ -82,6 +83,38 @@ discover_related_properties("SEAT_MEMORY_SELECT")
 # Analyze HVAC ecosystem
 discover_related_properties("HVAC_BASIC")
 ```
+
+### `analyze_vhal_implementation(property_name: str)` 🆕
+
+Analyzes Android source code to show how a vHAL property is implemented, including actual source code, file locations, and usage examples.
+
+**Features:**
+- **Real Android Source Code**: Fetches actual source files from Android Googlesource
+- **Implementation Analysis**: Extracts property definitions and configurations
+- **Usage Examples**: Provides C++/AIDL code examples for developers
+- **Source Links**: Direct URLs to Android source repositories
+- **Documentation**: Links to relevant Android documentation
+- **Implementation Tips**: Best practices and development guidance
+
+**Examples:**
+```python
+# Analyze steering wheel heating implementation
+analyze_vhal_implementation("HVAC_STEERING_WHEEL_HEAT")
+
+# Analyze seat memory implementation
+analyze_vhal_implementation("SEAT_MEMORY_SELECT")
+
+# Analyze any vHAL property
+analyze_vhal_implementation("HVAC_FAN_SPEED")
+```
+
+**Output includes:**
+- Source code files with syntax highlighting and line numbers
+- Property ID and implementation details
+- Dependencies and related components
+- C++/AIDL usage examples
+- File locations and direct links to Android source
+- Implementation tips and best practices
 
 ## Development
 

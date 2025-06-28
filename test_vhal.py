@@ -2,7 +2,7 @@
 """Test suite for vHAL MCP Server."""
 
 import unittest
-from server import summarize_vhal, lookup_android_source_code, discover_related_properties
+from server import summarize_vhal, lookup_android_source_code, discover_related_properties, analyze_vhal_implementation
 
 
 class TestVhalMcpServer(unittest.TestCase):
@@ -106,6 +106,11 @@ def run_basic_tests():
         print("5. Testing HVAC ecosystem discovery...")
         result = discover_related_properties("HVAC_BASIC")
         print(f"   ✓ HVAC ecosystem discovery successful ({len(result)} characters)")
+        
+        # Test vHAL implementation analysis
+        print("6. Testing vHAL implementation analysis...")
+        result = analyze_vhal_implementation("HVAC_STEERING_WHEEL_HEAT")
+        print(f"   ✓ Implementation analysis successful ({len(result)} characters)")
         
         print("\n" + "="*60)
         print("All tests completed successfully!")

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "vhal-mcp-server": {
+      "command": "uv",
+      "args": [
+        "run",
+        "python",
+        "/Users/felixboudnik/MCP/vhal-mcp-server/server.py"
+      ],
+      "cwd": "/Users/felixboudnik/MCP/vhal-mcp-server",
+      "env": {}
+    }
+  }
+}
