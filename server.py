@@ -12,6 +12,7 @@ from analyzers import AndroidSourceCodeAnalyzer
 from relationships import VhalPropertyRelationshipAnalyzer
 from summarizers import VhalSummarizer
 from code_generator import VhalCodeGenerator
+from pr_generator import VhalPullRequestGenerator
 
 
 mcp = FastMCP("vHAL MCP Server")
@@ -300,6 +301,121 @@ def generate_vhal_implementation_code(
         
     except Exception as e:
         return f"Error generating VHAL implementation: {str(e)}"
+
+
+@mcp.tool()
+def generate_vhal_pr_message(
+    property_name: str,
+    property_id: str,
+    property_type: str,
+    group: str,
+    access: str,
+    change_mode: str,
+    description: str,
+    units: str = None,
+    min_value: float = None,
+    max_value: float = None,
+    areas: list = None,
+    enum_values: dict = None,
+    dependencies: list = None,
+    sample_rate_hz: float = None,
+    breaking_change: bool = False,
+    jira_ticket: str = None,
+    reviewer_suggestions: list = None
+) -> str:
+    """Generate a comprehensive pull request message for VHAL property implementation.
+    
+    This tool creates a structured, professional PR description that includes all necessary
+    details about the VHAL property, implementation changes, testing requirements, and
+    review checklist.
+    
+    Args:
+        property_name: Property name (e.g., "HVAC_STEERING_WHEEL_HEAT")
+        property_id: Unique property ID (hex format, e.g., "0x15400A03")
+        property_type: Data type (BOOLEAN, INT32, INT64, FLOAT, STRING, BYTES, *_VEC, MIXED)
+        group: Property group (HVAC, SEAT, LIGHTS, POWER, CLIMATE, etc.)
+        access: Access mode (READ, WRITE, READ_WRITE)
+        change_mode: Change mode (STATIC, ON_CHANGE, CONTINUOUS)
+        description: Property description for documentation
+        units: Optional units (e.g., "celsius", "rpm")
+        min_value: Optional minimum value for numeric types
+        max_value: Optional maximum value for numeric types
+        areas: Optional list of vehicle areas/zones
+        enum_values: Optional dict of enum names and values for INT32 enum properties
+        dependencies: Optional list of dependent property names
+        sample_rate_hz: Optional sample rate for continuous properties
+        breaking_change: Whether this introduces breaking changes (default: False)
+        jira_ticket: Optional JIRA ticket reference
+        reviewer_suggestions: Optional list of specific review points
+        
+    Returns:
+        Complete pull request message ready to copy-paste into GitHub/GitLab
+    """
+    try:
+        # Generate the PR message structure
+        pr_message = VhalPullRequestGenerator.generate_pr_message(
+            property_name=property_name,
+            property_id=property_id,
+            property_type=property_type,
+            group=group,
+            access=access,
+            change_mode=change_mode,
+            description=description,
+            units=units,
+            min_value=min_value,
+            max_value=max_value,
+            areas=areas,
+            enum_values=enum_values,
+            dependencies=dependencies,
+            sample_rate_hz=sample_rate_hz,
+            breaking_change=breaking_change,
+            jira_ticket=jira_ticket,
+            reviewer_suggestions=reviewer_suggestions
+        )
+        
+        # Format the complete PR message
+        formatted_message = VhalPullRequestGenerator.format_pr_message(pr_message)
+        
+        # Add header and instructions
+        output_parts = [
+            "# Pull Request Message Generated",
+            "",
+            "## PR Title",
+            f"```",
+            pr_message.title,
+            f"```",
+            "",
+            "## PR Description",
+            "Copy and paste the following into your pull request:",
+            "",
+            "```markdown",
+            formatted_message,
+            "```",
+            "",
+            "## Usage Instructions",
+            "1. **Copy the PR Title** from the first code block",
+            "2. **Copy the PR Description** from the second code block",
+            "3. **Paste into your GitHub/GitLab PR**",
+            "4. **Review and customize** any sections as needed",
+            "5. **Check off completed items** in the checklist as you go",
+            "",
+            "## Features Included",
+            "-  **Professional Title** with appropriate emoji and property type",
+            "-  **Comprehensive Description** with motivation and overview",
+            "-  **Detailed Changes Summary** listing all modified files",
+            "-  **Technical Specifications** with complete property details",
+            "-  **Testing Coverage** with specific test cases and commands",
+            "-  **Documentation Links** and usage examples",
+            "-  **Review Checklist** for thorough code review",
+            "-  **Breaking Changes** section (if applicable)",
+            "",
+            "Ready to streamline your VHAL development workflow! 🚀"
+        ]
+        
+        return "\n".join(output_parts)
+        
+    except Exception as e:
+        return f"Error generating PR message: {str(e)}"
 
 
 @mcp.tool()

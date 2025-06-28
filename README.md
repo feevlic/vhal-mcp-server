@@ -49,6 +49,14 @@ https://github.com/user-attachments/assets/6fcdc5fb-6cbb-4c69-9528-fa3bdee4acb1
 - Supports all VHAL data types, property groups, and access modes
 - Includes HAL definitions, Java APIs, tests, and build configurations
 
+
+**`generate_vhal_pr_message(...)`**
+- Generates comprehensive pull request messages for VHAL implementations
+- Creates structured PR descriptions with technical details and testing requirements
+- Includes professional titles, change summaries, and review checklists
+- Ready-to-copy-paste format for GitHub/GitLab integration
+
+
 ## Installation
 
 ### Prerequisites
@@ -323,6 +331,73 @@ Create a biometric-based seat adjustment system:
 Generate the complete VHAL implementation.
 ```
 
+### VHAL Pull Request Generation Examples
+
+Use the `generate_vhal_pr_message` tool to create professional pull request messages:
+
+**Smart Dashboard Lighting PR**
+```
+Generate a comprehensive pull request message for my smart dashboard lighting implementation:
+
+- Property Name: DASHBOARD_SMART_LIGHTING_MODE
+- Property ID: 0x15400B01
+- Type: INT32
+- Group: LIGHTS
+- Access: READ_WRITE
+- Change Mode: ON_CHANGE
+- Description: Smart dashboard lighting control with adaptive brightness and color temperature
+- Enum Values: {"OFF": 0, "AUTO": 1, "DAY": 2, "NIGHT": 3, "CUSTOM": 4}
+- Dependencies: ["NIGHT_MODE", "CABIN_LIGHTS_STATE"]
+- JIRA Ticket: AUTO-1234
+- Reviewer Suggestions: ["Verify power consumption impact", "Test night mode transitions"]
+
+Please use the generate_vhal_pr_message tool.
+```
+
+**EV Charging System PR**
+```
+Create a pull request message for my electric vehicle charging management system:
+
+- Property Name: EV_CHARGING_PORT_STATUS
+- Property ID: 0x15400C01
+- Type: INT32
+- Group: POWER
+- Access: READ
+- Change Mode: ON_CHANGE
+- Description: Electric vehicle charging port status and connection state
+- Enum Values: {"DISCONNECTED": 0, "CONNECTED": 1, "CHARGING": 2, "ERROR": 3, "COMPLETE": 4, "SCHEDULED": 5}
+- Dependencies: ["EV_BATTERY_LEVEL", "EV_CHARGING_RATE"]
+- Areas: ["GLOBAL"]
+- Breaking Change: false
+
+Generate the complete PR message.
+```
+
+**Advanced HVAC Zone Control PR**
+```
+Generate a pull request message for my advanced HVAC zone control implementation:
+
+- Property Name: HVAC_ZONE_CLIMATE_PROFILE
+- Property ID: 0x15400D01
+- Type: FLOAT
+- Group: HVAC
+- Access: READ_WRITE
+- Change Mode: CONTINUOUS
+- Description: Advanced HVAC zone climate profile with precise temperature control
+- Units: celsius
+- Min Value: 16.0
+- Max Value: 32.0
+- Areas: ["SEAT_ROW_1_LEFT", "SEAT_ROW_1_RIGHT", "SEAT_ROW_2_LEFT", "SEAT_ROW_2_RIGHT"]
+- Dependencies: ["HVAC_TEMPERATURE_SET", "HVAC_FAN_SPEED"]
+- Sample Rate: 0.5
+- Breaking Change: false
+- JIRA Ticket: HVAC-567
+- Reviewer Suggestions: ["Review energy efficiency impact", "Validate zone isolation"]
+
+Create a professional PR message with all technical details and checklists.
+```
+
+
 ### Expert Prompt: Complete VHAL System Development
 
 This expert-level prompt demonstrates using all 5 MCP tools in a comprehensive workflow for developing a complete automotive system:
@@ -373,40 +448,20 @@ First, help me understand the complete landscape:
 - Units: none
 - Areas: ["GLOBAL", "SEAT_ROW_1_LEFT", "SEAT_ROW_1_RIGHT"]
 
+6. Plase also add a pull reuest message i can add to the Pull request once i implemented it.
+
 **Expected Deliverables:**
 After running this comprehensive analysis, I expect to receive:
 
-1. **Complete System Understanding** - From summarize_vhal: architectural overview and best practices
-2. **Property Inventory** - From lookup_android_source_code: all relevant properties with IDs and locations
-3. **Dependency Maps** - From discover_related_properties: implementation order and relationships
-4. **Implementation Patterns** - From analyze_vhal_implementation: real Android source code examples
-5. **Production-Ready Code** - From generate_vhal_implementation_code: complete implementation files
-
-**Integration Questions:**
-After the analysis, please also address:
-- How should I prioritize energy efficiency vs comfort in EV applications?
-- What are the safety considerations for automatic climate control?
-- How should the system handle conflicting user preferences in multi-zone scenarios?
-- What testing strategies are recommended for climate control systems?
-- How should I integrate with existing Android Automotive UI frameworks?
+1. **Complete System Understanding** -  architectural overview and best practices
+2. **Property Inventory** -  all relevant properties with IDs and locations
+3. **Dependency Maps** - implementation order and relationships
+4. **Implementation Patterns** -  real Android source code examples
+5. **Production-Ready Code** -  complete implementation files
+6. **Pull Request Text** - Copy and Paste Pull request text
 
 This comprehensive approach will give me everything needed to implement a production-quality intelligent climate control system.
 ```
-
-**Expected Workflow:**
-This expert prompt will trigger all 5 tools in sequence, providing:
-- **Comprehensive Documentation** (Tool 1)
-- **Complete Property Discovery** (Tool 2)
-- **Relationship Analysis** for 4+ property ecosystems (Tool 3)
-- **Source Code Analysis** for 4+ implementations (Tool 4)
-- **Production Code Generation** (Tool 5)
-
-**Benefits:**
-- **Complete System Understanding**: From high-level architecture to implementation details
-- **Real-World Patterns**: Based on actual Android Automotive source code
-- **Production-Ready Output**: All files needed for AAOS integration
-- **Best Practices**: Comprehensive guidance from Android experts
-- **Time Savings**: Hours of research condensed into minutes
 
 ### VHAL Code Generator Features
 
