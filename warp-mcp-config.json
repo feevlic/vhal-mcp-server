@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "mcp-server-demo": {
+    "vhal-mcp-server": {
       "command": "uv",
       "args": [
         "run",

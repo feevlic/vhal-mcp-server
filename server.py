@@ -1,136 +1,256 @@
 from mcp.server.fastmcp import FastMCP
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 import re
-from typing import List, Dict, Optional
+from typing import List, Dict, Tuple, Optional
+from dataclasses import dataclass
+from enum import Enum
 
-mcp = FastMCP("Demo")
 
-# Add vHAL summarization tool
-@mcp.tool()
-def summarize_vhal(question: str) -> str:
-    """Summarize vHAL (Vehicle Hardware Abstraction Layer) implementation based on a question.
+class VhalCategory(Enum):
+    SEAT = "SEAT"
+    HVAC = "HVAC"
+    GENERAL = "GENERAL"
+
+
+@dataclass
+class VhalProperty:
+    name: str
+    id: str
+    category: VhalCategory
+    description: str = ""
+
+
+@dataclass
+class SearchResult:
+    url: str
+    description: str
+    content: Optional[str] = None
+
+
+class VhalDocumentationScraper:
+    BASE_URL = "https://source.android.com/docs/automotive/vhal"
+    CONTENT_LIMIT = 5000
+    TIMEOUT = 10
     
-    Args:
-        question: The question about vHAL implementation
+    KNOWN_PAGES = [
+        "https://source.android.com/docs/automotive/vhal",
+        "https://source.android.com/docs/automotive/vhal/properties", 
+        "https://source.android.com/docs/automotive/vhal/vehicle-areas",
+        "https://source.android.com/docs/automotive/vhal/diagnostics",
+        "https://source.android.com/docs/automotive/vhal/hal-implementation"
+    ]
+    
+    @staticmethod
+    def scrape_page(url: str) -> Optional[str]:
+        try:
+            response = requests.get(url, timeout=VhalDocumentationScraper.TIMEOUT)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            for element in soup(["script", "style"]):
+                element.decompose()
+            
+            text = soup.get_text()
+            lines = (line.strip() for line in text.splitlines())
+            chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+            clean_text = ' '.join(chunk for chunk in chunks if chunk)
+            
+            return clean_text[:VhalDocumentationScraper.CONTENT_LIMIT]
+        except Exception:
+            return None
+    
+    @staticmethod
+    def discover_pages() -> List[str]:
+        try:
+            response = requests.get(VhalDocumentationScraper.BASE_URL, 
+                                  timeout=VhalDocumentationScraper.TIMEOUT)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            discovered_links = []
+            
+            for link in soup.find_all('a', href=True):
+                href = link.get('href')
+                if href and ('vhal' in href.lower() or 'vehicle' in href.lower()):
+                    full_url = urljoin(VhalDocumentationScraper.BASE_URL, href)
+                    if full_url.startswith('https://source.android.com/docs/automotive'):
+                        discovered_links.append(full_url)
+            
+            all_links = list(set(discovered_links + VhalDocumentationScraper.KNOWN_PAGES))
+            return all_links[:10]
+        except Exception:
+            return VhalDocumentationScraper.KNOWN_PAGES
+
+
+class VhalPropertyDatabase:
+    PROPERTIES = {
+        VhalCategory.SEAT: {
+            "SEAT_MEMORY_SELECT": "0x0B56",
+            "SEAT_MEMORY_SET": "0x0B57",
+            "SEAT_BELT_BUCKLED": "0x0B58",
+            "SEAT_BELT_HEIGHT_POS": "0x0B59",
+            "SEAT_BELT_HEIGHT_MOVE": "0x0B5A",
+            "SEAT_FORE_AFT_POS": "0x0B5B",
+            "SEAT_FORE_AFT_MOVE": "0x0B5C",
+            "SEAT_BACKREST_ANGLE_1_POS": "0x0B5D",
+            "SEAT_BACKREST_ANGLE_1_MOVE": "0x0B5E",
+            "SEAT_BACKREST_ANGLE_2_POS": "0x0B5F",
+            "SEAT_BACKREST_ANGLE_2_MOVE": "0x0B60",
+            "SEAT_HEIGHT_POS": "0x0B61",
+            "SEAT_HEIGHT_MOVE": "0x0B62",
+            "SEAT_DEPTH_POS": "0x0B63",
+            "SEAT_DEPTH_MOVE": "0x0B64",
+            "SEAT_TILT_POS": "0x0B65",
+            "SEAT_TILT_MOVE": "0x0B66",
+            "SEAT_LUMBAR_FORE_AFT_POS": "0x0B67",
+            "SEAT_LUMBAR_FORE_AFT_MOVE": "0x0B68",
+            "SEAT_LUMBAR_SIDE_SUPPORT_POS": "0x0B69",
+            "SEAT_LUMBAR_SIDE_SUPPORT_MOVE": "0x0B6A",
+            "SEAT_HEADREST_HEIGHT_POS": "0x0B6B",
+            "SEAT_HEADREST_HEIGHT_MOVE": "0x0B6C",
+            "SEAT_HEADREST_ANGLE_POS": "0x0B6D",
+            "SEAT_HEADREST_ANGLE_MOVE": "0x0B6E",
+            "SEAT_HEADREST_FORE_AFT_POS": "0x0B6F",
+            "SEAT_HEADREST_FORE_AFT_MOVE": "0x0B70"
+        },
+        VhalCategory.HVAC: {
+            "HVAC_FAN_SPEED": "0x0A01",
+            "HVAC_FAN_DIRECTION": "0x0A02",
+            "HVAC_TEMPERATURE_CURRENT": "0x0A03",
+            "HVAC_TEMPERATURE_SET": "0x0A04",
+            "HVAC_DEFROSTER": "0x0A05",
+            "HVAC_AC_ON": "0x0A06",
+            "HVAC_MAX_AC_ON": "0x0A07",
+            "HVAC_MAX_DEFROST_ON": "0x0A08",
+            "HVAC_RECIRC_ON": "0x0A09",
+            "HVAC_DUAL_ON": "0x0A0A",
+            "HVAC_AUTO_ON": "0x0A0B",
+            "HVAC_SEAT_TEMPERATURE": "0x0A0C",
+            "HVAC_SIDE_MIRROR_HEAT": "0x0A0D",
+            "HVAC_STEERING_WHEEL_HEAT": "0x0A0E",
+            "HVAC_TEMPERATURE_DISPLAY_UNITS": "0x0A0F",
+            "HVAC_ACTUAL_FAN_SPEED_RPM": "0x0A10",
+            "HVAC_POWER_ON": "0x0A11",
+            "HVAC_FAN_DIRECTION_AVAILABLE": "0x0A12",
+            "HVAC_AUTO_RECIRC_ON": "0x0A13",
+            "HVAC_SEAT_VENTILATION": "0x0A14"
+        }
+    }
+    
+    @classmethod
+    def search_properties(cls, keyword: str) -> List[VhalProperty]:
+        keyword_upper = keyword.upper()
+        matches = []
         
-    Returns:
-        A summary of relevant vHAL information from Android documentation
-    """
-    try:
-        # Base URL for Android vHAL documentation
-        base_url = "https://source.android.com/docs/automotive/vhal"
+        for category, properties in cls.PROPERTIES.items():
+            if keyword_upper in category.value:
+                for name, prop_id in properties.items():
+                    matches.append(VhalProperty(name, prop_id, category))
+                continue
+            
+            for name, prop_id in properties.items():
+                if keyword_upper in name or any(kw in name for kw in keyword_upper.split()):
+                    matches.append(VhalProperty(name, prop_id, category))
         
-        # Function to scrape content from a URL
-        def scrape_content(url: str) -> str:
-            try:
-                response = requests.get(url, timeout=10)
-                response.raise_for_status()
-                soup = BeautifulSoup(response.content, 'html.parser')
-                
-                # Remove script and style elements
-                for script in soup(["script", "style"]):
-                    script.decompose()
-                
-                # Get text content
-                text = soup.get_text()
-                # Clean up whitespace
-                lines = (line.strip() for line in text.splitlines())
-                chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-                text = ' '.join(chunk for chunk in chunks if chunk)
-                
-                return text[:5000]  # Limit content length
-            except Exception as e:
-                return f"Error scraping {url}: {str(e)}"
+        return matches
+
+
+class AndroidSourceLookup:
+    AIDL_URL = "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehicleProperty.aidl"
+    HAL_BASE_URL = "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/"
+    REFERENCE_IMPL_URL = "https://android.googlesource.com/device/generic/car/+/refs/heads/main/emulator/"
+    
+    @staticmethod
+    def generate_search_url(keyword: str) -> str:
+        return f"https://cs.android.com/search?q={keyword}%20automotive%20vehicle"
+    
+    @classmethod
+    def get_source_locations(cls) -> List[SearchResult]:
+        return [
+            SearchResult(
+                url=cls.AIDL_URL,
+                description="Vehicle Property AIDL Definition"
+            ),
+            SearchResult(
+                url=cls.HAL_BASE_URL,
+                description="HAL Implementation Directory"
+            ),
+            SearchResult(
+                url=cls.REFERENCE_IMPL_URL,
+                description="Reference Implementation"
+            )
+        ]
+
+
+class VhalSummarizer:
+    MAX_SECTIONS = 3
+    SECTION_LIMIT = 2000
+    SUMMARY_LIMIT = 4000
+    
+    @staticmethod
+    def extract_keywords(question: str) -> List[str]:
+        return re.findall(r'\b\w+\b', question.lower())
+    
+    @staticmethod
+    def score_content(content: str, keywords: List[str]) -> int:
+        content_lower = content.lower()
+        return sum(1 for keyword in keywords if keyword in content_lower)
+    
+    @classmethod
+    def summarize_documentation(cls, question: str, content_sections: List[str]) -> str:
+        keywords = cls.extract_keywords(question)
+        scored_sections = []
         
-        # Function to find relevant vHAL pages
-        def find_vhal_pages(base_url: str) -> List[str]:
-            try:
-                response = requests.get(base_url, timeout=10)
-                response.raise_for_status()
-                soup = BeautifulSoup(response.content, 'html.parser')
-                
-                links = []
-                for link in soup.find_all('a', href=True):
-                    href = link.get('href')
-                    if href and ('vhal' in href.lower() or 'vehicle' in href.lower()):
-                        full_url = urljoin(base_url, href)
-                        if full_url.startswith('https://source.android.com/docs/automotive'):
-                            links.append(full_url)
-                
-                # Add some known vHAL documentation pages
-                known_pages = [
-                    "https://source.android.com/docs/automotive/vhal",
-                    "https://source.android.com/docs/automotive/vhal/properties",
-                    "https://source.android.com/docs/automotive/vhal/vehicle-areas",
-                    "https://source.android.com/docs/automotive/vhal/diagnostics",
-                    "https://source.android.com/docs/automotive/vhal/hal-implementation"
-                ]
-                
-                # Combine and deduplicate
-                all_links = list(set(links + known_pages))
-                return all_links[:10]  # Limit to first 10 pages
-                
-            except Exception as e:
-                # Fallback to known pages if scraping fails
-                return [
-                    "https://source.android.com/docs/automotive/vhal",
-                    "https://source.android.com/docs/automotive/vhal/properties",
-                    "https://source.android.com/docs/automotive/vhal/vehicle-areas"
-                ]
-        
-        # Get vHAL documentation pages
-        vhal_pages = find_vhal_pages(base_url)
-        
-        # Scrape content from each page
-        all_content = []
-        for page_url in vhal_pages:
-            content = scrape_content(page_url)
-            if content and "Error scraping" not in content:
-                all_content.append(f"\n--- From {page_url} ---\n{content}")
-        
-        # Combine all content
-        combined_content = "\n".join(all_content)
-        
-        # Simple keyword matching to find relevant sections
-        question_lower = question.lower()
-        keywords = re.findall(r'\b\w+\b', question_lower)
-        
-        # Score content sections based on keyword relevance
-        sections = combined_content.split('---')
-        relevant_sections = []
-        
-        for section in sections:
+        for section in content_sections:
             if not section.strip():
                 continue
-                
-            section_lower = section.lower()
-            score = sum(1 for keyword in keywords if keyword in section_lower)
-            
+            score = cls.score_content(section, keywords)
             if score > 0:
-                relevant_sections.append((score, section[:2000]))  # Limit section length
+                scored_sections.append((score, section[:cls.SECTION_LIMIT]))
         
-        # Sort by relevance score
-        relevant_sections.sort(key=lambda x: x[0], reverse=True)
+        scored_sections.sort(key=lambda x: x[0], reverse=True)
         
-        if not relevant_sections:
-            return f"No specific vHAL information found for the question: '{question}'. Here's general vHAL overview:\n\n{combined_content[:1500]}..."
+        if not scored_sections:
+            fallback = "\n".join(content_sections)[:1500]
+            return f"No specific information found for '{question}'. General vHAL overview:\n\n{fallback}..."
         
-        # Create summary from most relevant sections
         summary_parts = [f"vHAL Summary for: '{question}'\n"]
-        
-        for score, section in relevant_sections[:3]:  # Top 3 most relevant sections
+        for _, section in scored_sections[:cls.MAX_SECTIONS]:
             summary_parts.append(section)
             summary_parts.append("\n" + "="*50 + "\n")
         
         summary = "\n".join(summary_parts)
+        if len(summary) > cls.SUMMARY_LIMIT:
+            summary = summary[:cls.SUMMARY_LIMIT] + "\n\n[Summary truncated]"
         
-        # Ensure summary isn't too long
-        if len(summary) > 4000:
-            summary = summary[:4000] + "\n\n[Summary truncated for length]"
-            
         return summary
+
+
+mcp = FastMCP("vHAL MCP Server")
+
+
+@mcp.tool()
+def summarize_vhal(question: str) -> str:
+    """Summarize vHAL implementation based on a question.
+    
+    Args:
+        question: Question about vHAL implementation
+        
+    Returns:
+        Summary of relevant vHAL information from Android documentation
+    """
+    try:
+        pages = VhalDocumentationScraper.discover_pages()
+        content_sections = []
+        
+        for page_url in pages:
+            content = VhalDocumentationScraper.scrape_page(page_url)
+            if content:
+                content_sections.append(content)
+        
+        return VhalSummarizer.summarize_documentation(question, content_sections)
         
     except Exception as e:
         return f"Error generating vHAL summary: {str(e)}"
@@ -138,172 +258,55 @@ def summarize_vhal(question: str) -> str:
 # Add a tool for looking up Android source code
 @mcp.tool()
 def lookup_android_source_code(keyword: str, category: str = "vhal") -> str:
-    """Lookup and return relevant Android source code for a given keyword.
+    """Lookup Android source code for a given keyword.
     
     Args:
-        keyword: The search term (e.g., "SEAT", "HVAC", "vehicle properties")
+        keyword: Search term (e.g., "SEAT", "HVAC", "vehicle properties")
         category: Category to focus search on (default: "vhal")
         
     Returns:
         Detailed information about the source code location and content
     """
     try:
-        # Define search strategies based on category
-        search_patterns = {
-            "vhal": [
-                f"https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/",
-                f"https://cs.android.com/search?q={keyword}%20file:VehicleProperty",
-                f"https://cs.android.com/search?q={keyword}%20file:automotive"
-            ],
-            "properties": [
-                f"https://cs.android.com/search?q={keyword}%20VehicleProperty",
-                f"https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehicleProperty.aidl"
-            ]
-        }
+        property_matches = VhalPropertyDatabase.search_properties(keyword)
+        source_locations = AndroidSourceLookup.get_source_locations()
+        search_url = AndroidSourceLookup.generate_search_url(keyword)
         
-        def search_android_cs(keyword: str) -> List[Dict[str, str]]:
-            """Search Android Code Search"""
-            results = []
-            search_url = f"https://cs.android.com/search?q={keyword}%20automotive%20vehicle"
-            
-            try:
-                # Note: This is a simplified approach since cs.android.com requires special handling
-                # In a real implementation, you'd need to handle the dynamic content
-                results.append({
-                    "type": "search_url",
-                    "description": f"Android Code Search for '{keyword}'",
-                    "url": search_url
-                })
-            except Exception as e:
-                results.append({"error": f"Search error: {str(e)}"})
-            
-            return results
+        result_parts = [
+            f"Android Source Code Lookup for: '{keyword}'\n",
+            "=" * 50
+        ]
         
-        def get_vhal_property_definitions() -> str:
-            """Get known vHAL property definitions"""
-            # Common vHAL properties with their IDs
-            known_properties = {
-                "SEAT": {
-                    "SEAT_MEMORY_SELECT": "0x0B56",
-                    "SEAT_MEMORY_SET": "0x0B57", 
-                    "SEAT_BELT_BUCKLED": "0x0B58",
-                    "SEAT_BELT_HEIGHT_POS": "0x0B59",
-                    "SEAT_BELT_HEIGHT_MOVE": "0x0B5A",
-                    "SEAT_FORE_AFT_POS": "0x0B5B",
-                    "SEAT_FORE_AFT_MOVE": "0x0B5C",
-                    "SEAT_BACKREST_ANGLE_1_POS": "0x0B5D",
-                    "SEAT_BACKREST_ANGLE_1_MOVE": "0x0B5E",
-                    "SEAT_BACKREST_ANGLE_2_POS": "0x0B5F",
-                    "SEAT_BACKREST_ANGLE_2_MOVE": "0x0B60",
-                    "SEAT_HEIGHT_POS": "0x0B61",
-                    "SEAT_HEIGHT_MOVE": "0x0B62",
-                    "SEAT_DEPTH_POS": "0x0B63",
-                    "SEAT_DEPTH_MOVE": "0x0B64",
-                    "SEAT_TILT_POS": "0x0B65",
-                    "SEAT_TILT_MOVE": "0x0B66",
-                    "SEAT_LUMBAR_FORE_AFT_POS": "0x0B67",
-                    "SEAT_LUMBAR_FORE_AFT_MOVE": "0x0B68",
-                    "SEAT_LUMBAR_SIDE_SUPPORT_POS": "0x0B69",
-                    "SEAT_LUMBAR_SIDE_SUPPORT_MOVE": "0x0B6A",
-                    "SEAT_HEADREST_HEIGHT_POS": "0x0B6B",
-                    "SEAT_HEADREST_HEIGHT_MOVE": "0x0B6C",
-                    "SEAT_HEADREST_ANGLE_POS": "0x0B6D",
-                    "SEAT_HEADREST_ANGLE_MOVE": "0x0B6E",
-                    "SEAT_HEADREST_FORE_AFT_POS": "0x0B6F",
-                    "SEAT_HEADREST_FORE_AFT_MOVE": "0x0B70"
-                },
-                "HVAC": {
-                    "HVAC_FAN_SPEED": "0x0A01",
-                    "HVAC_FAN_DIRECTION": "0x0A02",
-                    "HVAC_TEMPERATURE_CURRENT": "0x0A03",
-                    "HVAC_TEMPERATURE_SET": "0x0A04",
-                    "HVAC_DEFROSTER": "0x0A05",
-                    "HVAC_AC_ON": "0x0A06",
-                    "HVAC_MAX_AC_ON": "0x0A07",
-                    "HVAC_MAX_DEFROST_ON": "0x0A08",
-                    "HVAC_RECIRC_ON": "0x0A09",
-                    "HVAC_DUAL_ON": "0x0A0A",
-                    "HVAC_AUTO_ON": "0x0A0B",
-                    "HVAC_SEAT_TEMPERATURE": "0x0A0C",
-                    "HVAC_SIDE_MIRROR_HEAT": "0x0A0D",
-                    "HVAC_STEERING_WHEEL_HEAT": "0x0A0E",
-                    "HVAC_TEMPERATURE_DISPLAY_UNITS": "0x0A0F",
-                    "HVAC_ACTUAL_FAN_SPEED_RPM": "0x0A10",
-                    "HVAC_POWER_ON": "0x0A11",
-                    "HVAC_FAN_DIRECTION_AVAILABLE": "0x0A12",
-                    "HVAC_AUTO_RECIRC_ON": "0x0A13",
-                    "HVAC_SEAT_VENTILATION": "0x0A14"
-                }
-            }
-            
-            # Search for matching properties
-            matching_props = []
-            keyword_upper = keyword.upper()
-            
-            for category_name, props in known_properties.items():
-                if keyword_upper in category_name or any(keyword_upper in prop_name for prop_name in props.keys()):
-                    matching_props.append((category_name, props))
-            
-            if not matching_props:
-                # Try partial matching
-                for category_name, props in known_properties.items():
-                    for prop_name, prop_id in props.items():
-                        if any(kw in prop_name for kw in keyword_upper.split()):
-                            matching_props.append((category_name, {prop_name: prop_id}))
-                            break
-            
-            return matching_props
-        
-        # Get property definitions
-        property_matches = get_vhal_property_definitions()
-        
-        # Search Android Code Search
-        search_results = search_android_cs(keyword)
-        
-        # Compile results
-        result_parts = []
-        result_parts.append(f"Android Source Code Lookup for: '{keyword}'\n")
-        result_parts.append("=" * 50)
-        
-        # Add property definitions if found
         if property_matches:
             result_parts.append("\n## Vehicle Property Definitions:")
-            for category_name, props in property_matches:
-                result_parts.append(f"\n### {category_name} Properties:")
-                for prop_name, prop_id in props.items():
-                    result_parts.append(f"  - {prop_name}: {prop_id}")
+            
+            categories = {}
+            for prop in property_matches:
+                if prop.category not in categories:
+                    categories[prop.category] = []
+                categories[prop.category].append(prop)
+            
+            for category, props in categories.items():
+                result_parts.append(f"\n### {category.value} Properties:")
+                for prop in props:
+                    result_parts.append(f"  - {prop.name}: {prop.id}")
         
-        # Add source code locations
         result_parts.append("\n## Source Code Locations:")
+        for location in source_locations:
+            result_parts.append(f"\n### {location.description}:")
+            result_parts.append(f"URL: {location.url}")
         
-        # AIDL file location
-        result_parts.append("\n### Vehicle Property AIDL Definition:")
-        result_parts.append("File: platform/hardware/interfaces/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehicleProperty.aidl")
-        result_parts.append("URL: https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehicleProperty.aidl")
+        result_parts.append(f"\n## Search URL:")
+        result_parts.append(f"Android Code Search: {search_url}")
         
-        # HAL implementation
-        result_parts.append("\n### HAL Implementation:")
-        result_parts.append("Directory: platform/hardware/interfaces/automotive/vehicle/")
-        result_parts.append("URL: https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/automotive/vehicle/")
-        
-        # Reference implementation
-        result_parts.append("\n### Reference Implementation:")
-        result_parts.append("Directory: device/generic/car/emulator/")
-        result_parts.append("URL: https://android.googlesource.com/device/generic/car/+/refs/heads/main/emulator/")
-        
-        # Add search URLs
-        result_parts.append("\n## Search URLs:")
-        for result in search_results:
-            if "url" in result:
-                result_parts.append(f"- {result['description']}: {result['url']}")
-        
-        # Add usage information
-        if "SEAT" in keyword.upper():
-            result_parts.append("\n## Seat Property Usage:")
-            result_parts.append("- Area Type: VehicleAreaSeat (typically 0x05000000 base)")
-            result_parts.append("- Data Type: Usually INT32 for positions, BOOLEAN for states")
-            result_parts.append("- Access: Most seat properties are READ_WRITE")
-            result_parts.append("- Change Mode: ON_CHANGE for most properties")
+        if any("SEAT" in prop.name for prop in property_matches):
+            result_parts.extend([
+                "\n## Seat Property Usage:",
+                "- Area Type: VehicleAreaSeat (typically 0x05000000 base)",
+                "- Data Type: Usually INT32 for positions, BOOLEAN for states",
+                "- Access: Most seat properties are READ_WRITE",
+                "- Change Mode: ON_CHANGE for most properties"
+            ])
         
         return "\n".join(result_parts)
         
