@@ -35,7 +35,7 @@ class SourceCodeFile:
     line_count: int
 
 
-@dataclass 
+@dataclass
 class VhalImplementationAnalysis:
     property_name: str
     property_id: str

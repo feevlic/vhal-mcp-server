@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "vhal-mcp-server": {
+      "command": "/Users/[]/.local/bin/uv",
+      "args": ["run", "--directory", "/Users/[]/vhal-mcp-server", "python", "main.py"],
+      "env": {
+        "PYTHONPATH": "/Users/[]/vhal-mcp-server"
+      }
+    }
+  }
+}

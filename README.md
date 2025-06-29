@@ -117,6 +117,8 @@ https://github.com/user-attachments/assets/6fcdc5fb-6cbb-4c69-9528-fa3bdee4acb1
    }
    ```
 
+You can find an example in the config folder.
+
    **Important**: 
    - Replace `/path/to/your/uv` with the output from step 1 (e.g., `/Users/yourusername/.local/bin/uv`)
    - Replace `/path/to/vhal-mcp-server` with the actual path where you cloned the repository

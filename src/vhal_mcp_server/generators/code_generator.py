@@ -58,7 +58,7 @@ class VhalAccess(Enum):
 class VhalPropertyConfig:
     """Configuration for a VHAL property"""
     name: str
-    id: str  # Changed to string to handle hex values
+    id: str  
     type: str
     group: str
     access: str
@@ -113,7 +113,6 @@ class VhalCodeGenerator:
     ) -> GenerationResult:
         """Generate complete VHAL implementation"""
         
-        # Validate and convert property_id
         if isinstance(property_id, str):
             if property_id.startswith('0x'):
                 prop_id_int = int(property_id, 16)
@@ -122,7 +121,6 @@ class VhalCodeGenerator:
         else:
             prop_id_int = property_id
         
-        # Create configuration
         config = VhalPropertyConfig(
             name=name,
             id=property_id,
@@ -140,10 +138,8 @@ class VhalCodeGenerator:
             sample_rate_hz=sample_rate_hz
         )
         
-        # Generate all files
         files = VhalCodeGenerator._generate_all_files(config)
         
-        # Generate summary and guide
         summary = VhalCodeGenerator._generate_summary(config, len(files))
         guide = VhalCodeGenerator._generate_implementation_guide(config)
         
@@ -160,14 +156,12 @@ class VhalCodeGenerator:
         """Generate all necessary files for the VHAL property"""
         files = []
         
-        # 1. Property definition (types.hal)
         files.append(GeneratedFile(
             path="hardware/interfaces/automotive/vehicle/2.0/types.hal",
             content=VhalCodeGenerator._generate_types_hal(config),
             description="HAL property definition and enum values"
         ))
         
-        # 2. Default implementation
         files.append(GeneratedFile(
             path="hardware/interfaces/automotive/vehicle/2.0/default/impl/vhal_v2_0/DefaultConfig.h",
             content=VhalCodeGenerator._generate_default_config_h(config),
@@ -180,28 +174,24 @@ class VhalCodeGenerator:
             description="HAL implementation logic"
         ))
         
-        # 3. AIDL interface
         files.append(GeneratedFile(
             path="hardware/interfaces/automotive/vehicle/aidl/android/hardware/automotive/vehicle/VehicleProperty.aidl",
             content=VhalCodeGenerator._generate_aidl_property(config),
             description="AIDL interface definition"
         ))
         
-        # 4. Java constants
         files.append(GeneratedFile(
             path="packages/services/Car/car-lib/src/android/car/VehiclePropertyIds.java",
             content=VhalCodeGenerator._generate_java_constants(config),
             description="Java property constants"
         ))
         
-        # 5. CarPropertyManager integration
         files.append(GeneratedFile(
             path="packages/services/Car/car-lib/src/android/car/hardware/property/CarPropertyManager.java",
             content=VhalCodeGenerator._generate_car_property_manager(config),
             description="CarPropertyManager API methods"
         ))
         
-        # 6. Test files
         files.append(GeneratedFile(
             path="hardware/interfaces/automotive/vehicle/2.0/default/tests/VehicleHalTest.cpp",
             content=VhalCodeGenerator._generate_hal_test(config),
@@ -214,14 +204,12 @@ class VhalCodeGenerator:
             description="Java integration tests"
         ))
         
-        # 7. Configuration files
         files.append(GeneratedFile(
             path="device/generic/car/emulator/car_emulator_config.json",
             content=VhalCodeGenerator._generate_config_json(config),
             description="Emulator configuration"
         ))
         
-        # 8. SEPolicy
         files.append(GeneratedFile(
             path="system/sepolicy/private/car_service.te",
             content=VhalCodeGenerator._generate_sepolicy(config),
@@ -385,14 +373,14 @@ public static final int {config.name} = {config.id};"""
 
 TEST_F(VehicleHalTest, {config.name}Test) {{
     // Test property configuration
-    auto propConfig = mVehicleHal->getPropConfigs({{static_cast<int32_t>(VehicleProperty::{config.name})}});
+    auto propConfig = mVehicleHal->getPropConfigs({{static_cast<int32_t>(VehicleProperty::{config.name})}} );
     ASSERT_EQ(propConfig.size(), 1);
-    
+
     auto& config = propConfig[0];
     EXPECT_EQ(config.prop, static_cast<int32_t>(VehicleProperty::{config.name}));
     EXPECT_EQ(config.access, VehiclePropertyAccess::{config.access});
     EXPECT_EQ(config.changeMode, VehiclePropertyChangeMode::{config.change_mode});
-    
+
     {VhalCodeGenerator._generate_test_cases(config)}
 }}"""
     
