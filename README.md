@@ -1,4 +1,4 @@
-# vHAL MCP Server
+# vHal MCP Server
 
 MCP server for Android Vehicle Hardware Abstraction Layer (vHAL) documentation and source code analysis. This server provides intelligent tools for exploring vHAL properties, understanding their relationships, and implementing automotive climate control systems.
 
