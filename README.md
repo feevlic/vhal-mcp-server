@@ -115,13 +115,15 @@ https://github.com/user-attachments/assets/6fcdc5fb-6cbb-4c69-9528-fa3bdee4acb1
    Edit the configuration file and add the following (replace the paths with your actual paths):
    ```json
    {
-     "mcpServers": {
-       "vhal-mcp-server": {
-         "command": "/path/to/your/uv",
-         "args": ["run", "--directory", "/path/to/vhal-mcp-server", "python", "main.py"],
-         "env": {}
-       }
-     }
+  "mcpServers": {
+    "vhal-mcp-server": {
+      "command": "/Users/[]/.local/bin/uv",
+      "args": ["run", "--directory", "/Users/[]/vhal-mcp-server", "python", "main.py"],
+      "env": {
+        "PYTHONPATH": "/Users/[]/vhal-mcp-server"
+            }
+         }
+      }
    }
    ```
 
