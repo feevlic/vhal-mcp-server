@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from server import mcp
+from src.vhal_mcp_server.server import mcp
 
 
 def main():

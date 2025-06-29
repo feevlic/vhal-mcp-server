@@ -1,9 +1,9 @@
 from typing import Optional, Dict, List
-from models import (
+from ..models import (
     VhalCategory, PropertyRelationship, PropertyImplementationStep, 
     PropertyEcosystem
 )
-from database import VhalPropertyDatabase
+from ..core.database import VhalPropertyDatabase
 
 
 class VhalPropertyRelationshipAnalyzer:

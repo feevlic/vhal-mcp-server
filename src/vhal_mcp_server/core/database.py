@@ -6,7 +6,7 @@ Optimized with caching and efficient search algorithms.
 from urllib.parse import quote
 from typing import List, Dict, Set
 from functools import lru_cache
-from models import VhalProperty, VhalCategory, SearchResult
+from ..models import VhalProperty, VhalCategory, SearchResult
 
 
 class VhalPropertyDatabase:

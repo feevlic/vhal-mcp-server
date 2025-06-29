@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import unittest
-from server import summarize_vhal, lookup_android_source_code, discover_related_properties, analyze_vhal_implementation
+from src.vhal_mcp_server.server import summarize_vhal, lookup_android_source_code, discover_related_properties, analyze_vhal_implementation
 
 
 class TestVhalMcpServer(unittest.TestCase):

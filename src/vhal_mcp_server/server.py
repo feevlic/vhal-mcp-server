@@ -4,13 +4,13 @@ import threading
 from urllib3.util import Retry
 from requests.adapters import HTTPAdapter
 
-from scrapers import VhalDocumentationScraper
-from database import VhalPropertyDatabase, AndroidSourceLookup
-from analyzers import AndroidSourceCodeAnalyzer
-from relationships import VhalPropertyRelationshipAnalyzer
-from summarizers import VhalSummarizer
-from code_generator import VhalCodeGenerator
-from pr_generator import VhalPullRequestGenerator
+from .core.scrapers import VhalDocumentationScraper
+from .core.database import VhalPropertyDatabase, AndroidSourceLookup
+from .core.analyzers import AndroidSourceCodeAnalyzer
+from .utils.relationships import VhalPropertyRelationshipAnalyzer
+from .utils.summarizers import VhalSummarizer
+from .generators.code_generator import VhalCodeGenerator
+from .generators.pr_generator import VhalPullRequestGenerator
 
 class SessionManager:
     """Centralized session manager for all HTTP requests."""

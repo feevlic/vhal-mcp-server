@@ -2,8 +2,8 @@ import requests
 import base64
 from urllib.parse import quote
 from typing import List, Dict, Optional
-from models import SourceCodeFile, VhalImplementationAnalysis
-from database import VhalPropertyDatabase
+from ..models import SourceCodeFile, VhalImplementationAnalysis
+from .database import VhalPropertyDatabase
 
 
 class AndroidSourceCodeAnalyzer:

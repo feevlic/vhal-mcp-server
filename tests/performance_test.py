@@ -2,7 +2,9 @@
 import time
 import statistics
 from typing import List, Callable, Any
-from server import *
+from src.vhal_mcp_server.server import *
+from src.vhal_mcp_server.core.database import VhalPropertyDatabase
+from src.vhal_mcp_server.core.scrapers import VhalDocumentationScraper
 
 
 class PerformanceTester:

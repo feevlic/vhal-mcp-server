@@ -34,4 +34,4 @@ build-backend = "hatchling.build"
 packages = ["src"]
 
 [project.scripts]
-vhal-mcp-server = "server:main"
+vhal-mcp-server = "main:main"

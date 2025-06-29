@@ -130,29 +130,6 @@ https://github.com/user-attachments/assets/6fcdc5fb-6cbb-4c69-9528-fa3bdee4acb1
    
    When you first ask a question that requires the vHAL tools, Claude will prompt you to allow the MCP server to use its tools. Click "Allow" to enable the vHAL analysis capabilities.
 
-#### Zed Editor Configuration
-
-Add to your Zed settings.json:
-
-```json
-{
-  "assistant": {
-    "default_model": {
-      "provider": "anthropic",
-      "model": "claude-3-5-sonnet-20241022"
-    },
-    "version": "2"
-  },
-  "context_servers": [
-    {
-      "id": "vhal-mcp-server",
-      "executable": "python",
-      "args": ["/path/to/vhal-mcp-server/main.py"]
-    }
-  ]
-}
-```
-
 ## Usage
 
 ### Basic Usage
