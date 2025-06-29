@@ -647,13 +647,11 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 For questions, issues, or contributions:
 
-- **Repository**: https://github.com/felixboudnik/vhal-mcp-server
-- **Issues**: https://github.com/felixboudnik/vhal-mcp-server/issues
+- **Repository**: https://github.com/feevlic/vhal-mcp-server
+- **Issues**: https://github.com/feevlic/vhal-mcp-server/issues
 - **Documentation**: Refer to Android vHAL documentation at https://source.android.com/docs/automotive/vhal
 
 ## Related Resources
 
 - [Android Automotive Documentation](https://source.android.com/docs/automotive)
-- [Vehicle HAL (vHAL) Properties](https://source.android.com/docs/automotive/vhal/properties)
-- [Android Source Code Search](https://cs.android.com/)
 - [Model Context Protocol (MCP)](https://modelcontextprotocol.io/)
