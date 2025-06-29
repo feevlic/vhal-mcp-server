@@ -56,6 +56,14 @@ https://github.com/user-attachments/assets/6fcdc5fb-6cbb-4c69-9528-fa3bdee4acb1
 - Includes professional titles, change summaries, and review checklists
 - Ready-to-copy-paste format for GitHub/GitLab integration
 
+**`validate_vhal_sources_and_enhance_summary(question, include_source_validation, max_sources_to_check)`**
+- Enhanced vHAL summary with complete source transparency and validation
+- Validates URL accessibility to detect broken or moved documentation links
+- Provides confidence scoring based on source reliability and accessibility
+- Shows clear citations with response times and last-modified dates
+- Suggests alternative sources for failed URLs
+- Distinguishes between cached vs. live data for transparency
+
 
 ## Installation
 

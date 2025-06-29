@@ -7,6 +7,7 @@ from requests.adapters import HTTPAdapter
 from .core.scrapers import VhalDocumentationScraper
 from .core.database import VhalPropertyDatabase, AndroidSourceLookup
 from .core.analyzers import AndroidSourceCodeAnalyzer
+from .core.source_validator import VhalSourceValidator, EnhancedSummaryResult
 from .utils.relationships import VhalPropertyRelationshipAnalyzer
 from .utils.summarizers import VhalSummarizer
 from .generators.code_generator import VhalCodeGenerator
@@ -486,6 +487,92 @@ def generate_vhal_pr_message(
 
     except Exception as e:
         return f"Error generating PR message: {str(e)}"
+
+
+@mcp.tool()
+def validate_vhal_sources_and_enhance_summary(
+        question: str,
+        include_source_validation: bool = True,
+        max_sources_to_check: int = 10) -> str:
+    """Enhanced vHAL summary with source validation and transparency.
+    
+    This tool provides an enhanced version of vHAL summaries that includes:
+    - Source URL validation to ensure information comes from accessible sources
+    - Confidence scoring based on source accessibility
+    - Clear citations showing which sources contributed to each piece of information
+    - Alternative source suggestions for failed URLs
+    - Transparency about cached vs. live data
+    
+    Args:
+        question: Question about vHAL implementation
+        include_source_validation: Whether to validate URLs are accessible (default: True)
+        max_sources_to_check: Maximum number of sources to validate (default: 10)
+        
+    Returns:
+        Enhanced summary with source citations, validation status, and confidence metrics
+    """
+    try:
+        if VhalDocumentationScraper._session is None:
+            VhalDocumentationScraper._session = _session_manager.get_session()
+            
+        pages = VhalDocumentationScraper.discover_pages()
+        
+        sources_to_check = pages[:max_sources_to_check]
+        
+        content_sections = VhalDocumentationScraper.scrape_pages_parallel(sources_to_check)
+        
+        if not content_sections:
+            return "Unable to fetch vHAL documentation. Please check your internet connection or try again later."
+
+        summary_content = VhalSummarizer.summarize_documentation(question, content_sections)
+
+        source_validations = []
+        accessible_count = 0
+        cached_count = 0
+        
+        if include_source_validation:
+            source_validations = VhalSourceValidator.validate_sources_parallel(sources_to_check)
+            accessible_count = sum(1 for v in source_validations if v.is_accessible)
+           
+            for url in sources_to_check:
+                if VhalDocumentationScraper._is_cache_valid(url):
+                    cached_count += 1
+        else:
+            from .core.source_validator import SourceValidation
+            import time
+            for url in sources_to_check:
+                source_validations.append(SourceValidation(
+                    url=url,
+                    is_accessible=True,  # Assume accessible if not validating
+                    status_code=200,
+                    last_modified=None,
+                    content_length=None,
+                    response_time_ms=None,
+                    error_message=None,
+                    validation_timestamp=time.time()
+                ))
+            accessible_count = len(sources_to_check)
+        
+        confidence_score = VhalSourceValidator.calculate_confidence_score(source_validations)
+        
+        failed_validations = [v for v in source_validations if not v.is_accessible]
+        suggestions = VhalSourceValidator.suggest_alternatives_for_failed_sources(failed_validations)
+        
+        enhanced_result = EnhancedSummaryResult(
+            question=question,
+            summary_content=summary_content,
+            source_validations=source_validations,
+            confidence_score=confidence_score,
+            total_sources_checked=len(sources_to_check),
+            accessible_sources_count=accessible_count,
+            cached_sources_count=cached_count,
+            suggestions_for_failed_sources=suggestions
+        )
+        
+        return VhalSourceValidator.format_enhanced_summary(enhanced_result)
+        
+    except Exception as e:
+        return f"Error generating enhanced vHAL summary: {str(e)}"
 
 
 @mcp.tool()
