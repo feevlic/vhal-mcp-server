@@ -8,6 +8,7 @@ from .core.scrapers import VhalDocumentationScraper
 from .core.database import VhalPropertyDatabase, AndroidSourceLookup
 from .core.analyzers import AndroidSourceCodeAnalyzer
 from .core.source_validator import VhalSourceValidator, EnhancedSummaryResult
+from .core.property_validator import VhalPropertyValidator, PropertyValidationResult
 from .utils.relationships import VhalPropertyRelationshipAnalyzer
 from .utils.summarizers import VhalSummarizer
 from .generators.code_generator import VhalCodeGenerator
@@ -677,6 +678,72 @@ def analyze_vhal_implementation(
 
     except Exception as e:
         return f"Error analyzing vHAL implementation: {str(e)}"
+
+
+@mcp.tool()
+def validate_vhal_property_request(
+    property_name: str,
+    property_description: str,
+    property_type: str = "INT32",
+    group: str = "VENDOR",
+    access: str = "READ_WRITE",
+    change_mode: str = "ON_CHANGE",
+    units: str = None,
+    min_value: float = None,
+    max_value: float = None,
+    areas: list = None,
+    enum_values: dict = None,
+    dependencies: list = None,
+    sample_rate_hz: float = None,
+    android_version: str = None
+) -> str:
+    """Validate vHAL property request and recommend using existing Android property or creating VENDOR_ property.
+
+    This tool follows Android best practices: check if a property already exists in the latest Android release
+    (currently Android 16) and either recommend using the existing property or generate a new VENDOR_ property
+    with proper naming convention.
+
+    Args:
+        property_name: Requested property name (e.g., "SEAT_MASSAGE_INTENSITY")
+        property_description: Description of what the property does
+        property_type: Data type (BOOLEAN, INT32, INT64, FLOAT, STRING, BYTES, *_VEC, MIXED) - default: INT32
+        group: Property group (HVAC, SEAT, LIGHTS, POWER, VENDOR, etc.) - default: VENDOR
+        access: Access mode (READ, WRITE, READ_WRITE) - default: READ_WRITE
+        change_mode: Change mode (STATIC, ON_CHANGE, CONTINUOUS) - default: ON_CHANGE
+        units: Optional units (e.g., "celsius", "rpm")
+        min_value: Optional minimum value for numeric types
+        max_value: Optional maximum value for numeric types
+        areas: Optional list of vehicle areas/zones
+        enum_values: Optional dict of enum names and values for INT32 enum properties
+        dependencies: Optional list of dependent property names
+        sample_rate_hz: Optional sample rate for continuous properties
+        android_version: Android version to check against (default: android16)
+
+    Returns:
+        Comprehensive validation result with recommendations and implementation guidance
+    """
+    try:
+        validation_result = VhalPropertyValidator.validate_property_request(
+            property_name=property_name,
+            property_description=property_description,
+            property_type=property_type,
+            group=group,
+            access=access,
+            change_mode=change_mode,
+            units=units,
+            min_value=min_value,
+            max_value=max_value,
+            areas=areas,
+            enum_values=enum_values,
+            dependencies=dependencies,
+            sample_rate_hz=sample_rate_hz,
+            android_version=android_version
+        )
+        
+        return VhalPropertyValidator.format_validation_result(validation_result)
+        
+    except Exception as e:
+        return f"Error validating vHAL property request: {str(e)}"
 
 
 if __name__ == "__main__":

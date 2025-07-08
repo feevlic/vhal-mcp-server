@@ -64,6 +64,15 @@ https://github.com/user-attachments/assets/6fcdc5fb-6cbb-4c69-9528-fa3bdee4acb1
 - Suggests alternative sources for failed URLs
 - Distinguishes between cached vs. live data for transparency
 
+**`validate_vhal_property_request(property_name, property_description, ...)`**
+- Validates vHAL property requests following Android best practices
+- Checks if property already exists in latest Android release (Android 16)
+- Recommends using existing Android properties when available
+- Generates VENDOR_ properties with proper naming convention when needed
+- Provides comprehensive analysis with similarity scoring and recommendations
+- Supports all VHAL data types, property groups, and configurations
+- Integrates with existing code generation tools for complete implementation
+
 
 ## Installation
 
@@ -386,10 +395,95 @@ Generate a pull request message for my advanced HVAC zone control implementation
 Create a professional PR message with all technical details and checklists.
 ```
 
+### VHAL Property Validation Examples
+
+Use the `validate_vhal_property_request` tool to follow Android best practices and validate property requests:
+
+**Check for Existing Properties**
+```
+I want to implement a seat heating control feature. Can you validate if I should use an existing Android property or create a new VENDOR_ property?
+
+- Property Name: SEAT_HEATING_CONTROL
+- Description: Control seat heating levels for driver and passenger seats
+- Property Type: INT32
+- Min Value: 0
+- Max Value: 5
+- Areas: ["SEAT_ROW_1_LEFT", "SEAT_ROW_1_RIGHT"]
+
+Please use the validate_vhal_property_request tool.
+```
+
+**Validate Climate Control Properties**
+```
+Validate this climate control property request:
+
+- Property Name: CLIMATE_AUTO_MODE
+- Description: Enable automatic climate control mode
+- Property Type: BOOLEAN
+- Group: HVAC
+- Access: READ_WRITE
+- Change Mode: ON_CHANGE
+
+Use validate_vhal_property_request to check if this exists in Android 16.
+```
+
+**Custom Vehicle Feature Validation**
+```
+I need to implement a custom vehicle feature. Please validate:
+
+- Property Name: VEHICLE_AMBIENT_SOUND_CONTROL
+- Description: Control ambient sound system for enhanced driving experience
+- Property Type: INT32
+- Group: VENDOR
+- Access: READ_WRITE
+- Change Mode: ON_CHANGE
+- Enum Values: {"OFF": 0, "NATURE": 1, "CITY": 2, "HIGHWAY": 3, "CUSTOM": 4}
+- Dependencies: ["AUDIO_VOLUME", "CABIN_LIGHTS_STATE"]
+
+Please use validate_vhal_property_request to determine if I should create a VENDOR_ property.
+```
+
+**Advanced Property Validation**
+```
+Validate this advanced property request with full specifications:
+
+- Property Name: BIOMETRIC_DRIVER_RECOGNITION
+- Description: Biometric driver recognition system for personalized vehicle settings
+- Property Type: STRING
+- Group: VENDOR
+- Access: READ_WRITE
+- Change Mode: ON_CHANGE
+- Units: none
+- Areas: ["GLOBAL"]
+- Dependencies: ["SEAT_MEMORY_SELECT", "MIRROR_Y_POS", "HVAC_TEMPERATURE_SET"]
+- Sample Rate: 0.1 Hz
+
+Use validate_vhal_property_request to check Android 16 compatibility and get implementation guidance.
+```
+
+**Property Type Validation**
+```
+I'm implementing a tire pressure monitoring system. Please validate:
+
+- Property Name: TIRE_PRESSURE_MONITORING_DETAILED
+- Description: Detailed tire pressure monitoring with per-tire data and alerts
+- Property Type: FLOAT_VEC
+- Group: POWER
+- Access: READ
+- Change Mode: CONTINUOUS
+- Units: psi
+- Min Value: 0.0
+- Max Value: 100.0
+- Areas: ["WHEEL_LEFT_FRONT", "WHEEL_RIGHT_FRONT", "WHEEL_LEFT_REAR", "WHEEL_RIGHT_REAR"]
+- Sample Rate: 1.0 Hz
+
+Use validate_vhal_property_request to determine if Android 16 has equivalent functionality.
+```
+
 
 ### Expert Prompt: Complete VHAL System Development
 
-This expert-level prompt demonstrates using all 5 MCP tools in a comprehensive workflow for developing a complete automotive system:
+This expert-level prompt demonstrates using all 6 MCP tools in a comprehensive workflow for developing a complete automotive system:
 
 ```
 I'm developing a next-generation intelligent climate control system for luxury electric vehicles. This system needs to integrate multiple subsystems and provide personalized comfort experiences. Please help me design and implement this system using a comprehensive analysis approach:
@@ -422,8 +516,23 @@ First, help me understand the complete landscape:
    - "SEAT_HEAT_LEFT" - analyze seat heating implementation patterns
    - "HVAC_AC_ON" - understand AC compressor control
 
-**Phase 5: Custom Implementation (Tool 5)**
-5. Based on the analysis create a new intelligent climate property:
+**Phase 5: Property Validation (Tool 5)**
+5. Before implementing, validate the property request:
+
+- Property Name: CLIMATE_INTELLIGENT_PROFILE
+- Description: Intelligent climate control with predictive comfort algorithms, energy optimization, and personalized user profiles
+- Property Type: INT32
+- Group: HVAC
+- Access: READ_WRITE
+- Change Mode: ON_CHANGE
+- Enum Values: {"PROFILE_ECO": 0, "PROFILE_COMFORT": 1, "PROFILE_SPORT": 2, "PROFILE_CUSTOM": 3, "PROFILE_SLEEP": 4, "PROFILE_DEFROST_PRIORITY": 5}
+- Dependencies: ["HVAC_TEMPERATURE_SET", "HVAC_FAN_SPEED", "SEAT_HEAT_LEFT", "SEAT_HEAT_RIGHT", "HVAC_AC_ON", "EV_BATTERY_LEVEL"]
+- Areas: ["GLOBAL", "SEAT_ROW_1_LEFT", "SEAT_ROW_1_RIGHT"]
+
+Use validate_vhal_property_request to determine if this should be a VENDOR_ property or if Android 16 has equivalent functionality.
+
+**Phase 6: Custom Implementation (Tool 6)**
+6. Based on the validation results, create the property implementation:
 
 - Property Name: CLIMATE_INTELLIGENT_PROFILE
 - Property ID: 0x15400F01
@@ -437,7 +546,7 @@ First, help me understand the complete landscape:
 - Units: none
 - Areas: ["GLOBAL", "SEAT_ROW_1_LEFT", "SEAT_ROW_1_RIGHT"]
 
-6. Plase also add a pull reuest message i can add to the Pull request once i implemented it.
+7. Please also add a pull request message i can add to the Pull request once i implemented it.
 
 **Expected Deliverables:**
 After running this comprehensive analysis, I expect to receive:
@@ -446,8 +555,9 @@ After running this comprehensive analysis, I expect to receive:
 2. **Property Inventory** -  all relevant properties with IDs and locations
 3. **Dependency Maps** - implementation order and relationships
 4. **Implementation Patterns** -  real Android source code examples
-5. **Production-Ready Code** -  complete implementation files
-6. **Pull Request Text** - Copy and Paste Pull request text
+5. **Property Validation** - Android best practices validation and recommendations
+6. **Production-Ready Code** -  complete implementation files
+7. **Pull Request Text** - Copy and Paste Pull request text
 
 This comprehensive approach will give me everything needed to implement a production-quality intelligent climate control system.
 ```
@@ -597,14 +707,22 @@ The server uses parallel scraping and caching mechanisms for optimal performance
 
 ```
 vhal-mcp-server/
-├── server.py              # Main MCP server implementation
-├── analyzers.py           # Source code analysis tools
-├── database.py            # Property database and lookups
-├── relationships.py       # Property relationship analysis
-├── scrapers.py           # Documentation scraping utilities
-├── summarizers.py        # Documentation summarization
-├── models.py             # Data models and structures
-└── tests/                # Test suite
+├── src/vhal_mcp_server/
+│   ├── server.py              # Main MCP server implementation
+│   ├── core/
+│   │   ├── analyzers.py       # Source code analysis tools
+│   │   ├── database.py        # Property database and lookups
+│   │   ├── property_validator.py # Property validation and VENDOR_ generation
+│   │   ├── scrapers.py        # Documentation scraping utilities
+│   │   └── source_validator.py # Source validation utilities
+│   ├── utils/
+│   │   ├── relationships.py   # Property relationship analysis
+│   │   └── summarizers.py     # Documentation summarization
+│   ├── generators/
+│   │   ├── code_generator.py  # VHAL code generation
+│   │   └── pr_generator.py    # Pull request generation
+│   └── models.py             # Data models and structures
+└── tests/                    # Test suite
 ```
 
 ### Testing

@@ -6,6 +6,19 @@ from typing import List, Dict, Optional
 class VhalCategory(Enum):
     SEAT = "SEAT"
     HVAC = "HVAC"
+    LIGHTS = "LIGHTS"
+    POWER = "POWER"
+    BODY = "BODY"
+    CABIN = "CABIN"
+    CLIMATE = "CLIMATE"
+    DISPLAY = "DISPLAY"
+    ENGINE = "ENGINE"
+    INFO = "INFO"
+    INSTRUMENT_CLUSTER = "INSTRUMENT_CLUSTER"
+    MIRROR = "MIRROR"
+    VEHICLE_MAP_SERVICE = "VEHICLE_MAP_SERVICE"
+    WINDOW = "WINDOW"
+    VENDOR = "VENDOR"
     GENERAL = "GENERAL"
 
 
